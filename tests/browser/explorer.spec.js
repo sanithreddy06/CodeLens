@@ -1,0 +1,71 @@
+const { test, expect } = require('@playwright/test');
+const { makeZip } = require('../../server/test/zipFixture.cjs');
+const fixture = makeZip({ 'src/index.js': 'export function greet() { return "hello"; }\n', 'README.md': '# Demo\nA greeting application.', 'package.json': '{"name":"demo"}' });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Email address').fill('browser@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+});
+async function upload(page, name) {
+  await page.getByRole('radio', { name: 'Upload ZIP' }).check();
+  await page.locator('input[type=file]').setInputFiles({ name, mimeType: 'application/zip', buffer: fixture });
+  await page.getByRole('button', { name: 'Analyze Project', exact: true }).click();
+}
+test('import, source navigation, graph, persistent chat, and tutorials', async ({ page }, testInfo) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  // A transient history failure must not abandon a successfully submitted job.
+  await page.route('**/api/jobs', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"History temporarily unavailable"}' }), { times: 1 });
+  await upload(page, `demo-${testInfo.project.name}.zip`);
+  await expect(page.getByText('Analyzed 3 of 3 files', { exact: false })).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('.project-name')).toHaveText(`demo-${testInfo.project.name}`);
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download report' }).click();
+  const report = await downloaded;
+  expect(report.suggestedFilename()).toMatch(/-analysis\.md$/);
+  const reportText = require('node:fs').readFileSync(await report.path(), 'utf8');
+  expect(reportText).toContain('Revision:');
+  expect(reportText).toContain('src/index.js');
+  await page.getByRole('button', { name: 'Structure', exact: true }).click();
+  await page.getByRole('button', { name: 'index.js', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('export function greet()');
+  await page.getByLabel('Search source', { exact: true }).fill('greet');
+  await expect(page.getByRole('status')).toContainText('1 / 1 matching lines');
+  await page.getByRole('button', { name: 'Close source viewer' }).click();
+  await page.getByRole('button', { name: 'Graph', exact: true }).click();
+  await expect(page.getByText('Showing 3 of 3 nodes', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Q&A', exact: true }).click();
+  await page.getByLabel('Question about this project').fill('Where is greet implemented?');
+  await page.getByRole('button', { name: 'Send question' }).click();
+  await expect(page.getByText('This is a fake LLM answer', { exact: false })).toBeVisible();
+  const citedFile = page.locator('.chat-sources details').filter({ hasText: 'src/index.js' });
+  await citedFile.locator('summary').click();
+  await citedFile.getByRole('button', { name: 'Open source at line 1' }).click();
+  await expect(page.getByRole('dialog')).toContainText('export function greet()');
+  await page.getByRole('button', { name: 'Close source viewer' }).click();
+  await page.getByRole('button', { name: 'Tutorials', exact: true }).click();
+  await page.getByRole('button', { name: '1. Entry Point', exact: true }).click();
+  await expect(page.locator('.chapter-content h1')).toBeVisible();
+  await page.reload();
+  await page.locator('.history-row > button:first-child').first().click();
+  await expect(page.getByRole('button', { name: 'Q&A', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Q&A', exact: true }).click();
+  await expect(page.getByText('Where is greet implemented?', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('explorer.png'), fullPage: true });
+  expect(errors).toEqual([]);
+});
+test('session expiry returns to login without exposing saved source', async ({ page, context }) => {
+  await context.clearCookies();
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+});
+test('running analysis can be cancelled from the interface', async ({ page }) => {
+  await page.getByRole('radio', { name: 'Upload ZIP' }).check();
+  const content = makeZip({ 'index.js': `export const unique = ${Date.now()};`, 'core.js': 'export const core = 1', 'README.md': '# Cancel' });
+  await page.locator('input[type=file]').setInputFiles({ name: 'cancel.zip', mimeType: 'application/zip', buffer: content });
+  await page.getByRole('button', { name: 'Analyze Project', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancel analysis' }).click();
+  await expect(page.locator('.sidebar-error')).toContainText('Cancelled');
+});

@@ -1,0 +1,23 @@
+const { test, expect } = require('@playwright/test');
+const { makeZip } = require('../../server/test/zipFixture.cjs');
+test('source exploration works without any AI configuration', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Email address').fill('browser@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByText('AI is not configured yet.', { exact: false })).toBeVisible();
+  await page.getByRole('radio', { name: 'Upload ZIP' }).check();
+  await page.locator('input[type=file]').setInputFiles({ name: 'keyless.zip', mimeType: 'application/zip', buffer: makeZip({ 'index.js': 'export function greet() { return "hello"; }' }) });
+  await page.getByRole('button', { name: 'Analyze Project', exact: true }).click();
+  await expect(page.getByText('Analyzed 1 of 1 files', { exact: false })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Project Overview', exact: true })).toBeVisible();
+  await expect(page.getByText('Demo mode:', { exact: false })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Retry missing tutorials' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Structure', exact: true }).click();
+  await page.getByRole('button', { name: 'index.js', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('function greet');
+  await page.getByRole('button', { name: 'Close source viewer' }).click();
+  await page.getByRole('button', { name: 'Q&A', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Q&A is not enabled yet' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Send question' })).toHaveCount(0);
+});

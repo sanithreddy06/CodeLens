@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: codelens
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/ready
+    disk:
+      name: codelens-data
+      mountPath: /app/server/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /app/server/data/codelens.db
+      - key: LLM_PROVIDER
+        value: GEMINI
+      - key: AI_MODE
+        value: auto
+      - key: TRUST_PROXY_HOPS
+        value: 1
+      - key: FAKE_LLM
+        value: false
+      - key: LOGIN_USERS
+        sync: false

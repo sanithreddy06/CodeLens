@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+**/data
+**/*.db*
+**/*.sqlite*
+**/backups
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+.git
+.DS_Store
+test-results
+playwright-report

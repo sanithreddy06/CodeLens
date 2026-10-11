@@ -1,0 +1,32 @@
+{
+  "name": "ai-codebase-knowledge-builder",
+  "version": "1.0.0",
+  "description": "Fullstack AI Codebase Knowledge Builder",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "install-all": "npm ci && npm ci --prefix server && npm ci --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js",
+    "start:prod": "node server/start-production.js",
+    "test": "npm test --prefix server",
+    "test:e2e": "node server/e2e/smoke.js",
+    "lint": "npm run lint --prefix client",
+    "dev:demo": "cross-env FAKE_LLM=true NODE_ENV=development LOGIN_USERS=demo@example.com:demo-password MEMBER_EMAILS= npm run dev",
+    "user:create": "node server/scripts/create-user.js",
+    "check": "npm run lint && npm test && npm run build",
+    "test:browser": "playwright test",
+    "db:backup": "node server/scripts/backup.js",
+    "test:production": "node server/e2e/production.js",
+    "test:browser:keyless": "playwright test --config playwright.keyless.config.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
