@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { makeZip } = require('../../server/test/zipFixture.cjs');
 const fixture = makeZip({ 'src/index.js': 'export function greet() { return "hello"; }\n', 'README.md': '# Demo\nA greeting application.', 'package.json': '{"name":"demo"}' });
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#signin');
   await page.getByLabel('Email address').fill('browser@example.com');
   await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();

@@ -42,7 +42,7 @@ async function main() {
     }
     assert.equal((await fetch(`${base}/api/ready`)).status, 200);
     const html = await (await fetch(base)).text();
-    assert.match(html, /<title>CodeLens<\/title>/);
+    assert.match(html, /<title>CodeLens — Understand your codebase<\/title>/);
     const script = html.match(/src="([^"]+\.js)"/)[1];
     assert.equal((await fetch(new URL(script, base))).status, 200);
     let cookie, csrf;

@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { makeZip } = require('../../server/test/zipFixture.cjs');
 test('source exploration works without any AI configuration', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#signin');
   await page.getByLabel('Email address').fill('browser@example.com');
   await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();

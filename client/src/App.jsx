@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
+import './product.css'
+import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
 import ExplorerLayout from './components/ExplorerLayout'
 import { apiRequest, clearSession } from './config/api'
@@ -12,6 +14,7 @@ const wait = (ms, signal) => new Promise((resolve, reject) => {
   signal.addEventListener('abort', abort, { once: true })
 })
 function App() {
+  const [page, setPage] = useState(window.location.hash)
   const [user, setUser] = useState(null)
   const [aiEnabled, setAiEnabled] = useState(false)
   const [checking, setChecking] = useState(true)
@@ -23,6 +26,15 @@ function App() {
   const [history, setHistory] = useState([])
   const [nextOffset, setNextOffset] = useState(null)
   const active = useRef(null)
+
+  useEffect(() => {
+    const navigate = () => {
+      setPage(window.location.hash)
+      if (['', '#', '#signin'].includes(window.location.hash)) window.scrollTo(0, 0)
+    }
+    window.addEventListener('hashchange', navigate)
+    return () => window.removeEventListener('hashchange', navigate)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -40,13 +52,14 @@ function App() {
         setHistory(data.jobs)
         setNextOffset(data.nextOffset)
       } catch (err) {
-        if (!controller.signal.aborted && err.status !== 401) setError('Could not connect to the server. Check that it is running and try signing in.')
+        if (!controller.signal.aborted && err.status !== 401) setError('Could not connect to the server. Please try again in a moment.')
       } finally { if (!controller.signal.aborted) setChecking(false) }
     }
     const expired = () => {
       active.current?.abort()
       clearSession()
       setUser(null); setAnalysisData(null); setAnalysisJob(null); setHistory([]); setAnalyzing(false)
+      window.location.hash = 'signin'
       setError('Your session expired. Please sign in again.')
     }
     window.addEventListener('codelens:session-expired', expired)
@@ -140,7 +153,7 @@ function App() {
     } catch (err) { setError(err.message) }
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
-  if (!user) return <LoginPage onLogin={handleLogin} error={error} loading={loggingIn} />
+  if (!user) return page === '#signin' ? <LoginPage onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
   return <ExplorerLayout user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
     analysisJob={analysisJob} analysisStartedAt={analysisJob?.createdAt} onAnalyzeGithub={analyzeGithub}
     onAnalyzeZip={analyzeZip} analyzing={analyzing} history={history} onOpenJob={id => runJob(async () => id)}

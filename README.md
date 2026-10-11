@@ -1,14 +1,31 @@
 # CodeLens
 
-CodeLens turns a public GitHub repository or uploaded ZIP into a source explorer, import graph, guided tutorials, and source-backed Q&A.
+### Less lost in code. More building.
 
-**Deploy without API keys:** follow [DEPLOYMENT.md](DEPLOYMENT.md). Source exploration works immediately; configure an AI provider later to enable tutorials and Q&A for saved imports.
+A website for developers and students to understand unfamiliar codebases. Bring a public GitHub repository or project ZIP, explore its structure, and learn how the pieces fit together.
 
-Before inviting testers or opening public signups, work through [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) and record deployment verification results.
+[Host the website](DEPLOYMENT.md) · [Release roadmap](RELEASE_CHECKLIST.md) · [Development setup](#develop-locally)
 
-The application uses React/Vite, Express, Node 24's SQLite implementation, and a configurable AI provider. It runs as a single server process with a durable SQLite job queue and local upload storage.
+## A workspace for understanding code
 
-## Run locally
+CodeLens is a browser-based product for developers joining unfamiliar projects and students learning from real codebases. The public website introduces the workflow; invited users sign in to a persistent analysis workspace.
+
+- **Bring a project:** import a public GitHub repository or upload a ZIP.
+- **Find your bearings:** explore source files, inspect metrics, and navigate import relationships.
+- **Learn in context:** use guided tutorials and source-backed Q&A when AI is configured.
+- **Keep your progress:** reopen saved analyses and export a Markdown report.
+
+The website includes a responsive public landing page, interactive product illustration, dedicated sign-in experience, and desktop/mobile workspace. Illustrations are labelled examples; they do not represent live AI results.
+
+**Release status:** invitation-only beta. Public signup, password recovery, billing, and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
+
+## Host the website
+
+Deploy the frontend and API together using [the deployment guide](DEPLOYMENT.md). Users visit your hosted HTTPS URL; they do not need to install Node.js or run a local server. The hosting operator configures accounts, storage, and optional AI keys.
+
+The homepage is `/`; sign-in is `/#signin`. Authenticated visitors enter their workspace. Source exploration works without AI keys; AI features are explicitly gated until a provider is enabled. This repository has not been deployed to a public domain automatically.
+
+## Develop locally
 
 Install **Node.js 24** and npm, then:
 

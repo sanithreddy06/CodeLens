@@ -5,6 +5,7 @@ const GraphTab = lazy(() => import('./tabs/GraphTab'))
 const QATab = lazy(() => import('./tabs/QATab'))
 const TutorialsTab = lazy(() => import('./tabs/TutorialsTab'))
 import AnalysisProgress from './AnalysisProgress'
+import { Brand } from './LandingPage'
 import SourceViewer from './SourceViewer'
 import ErrorBoundary from './ErrorBoundary'
 import { downloadAnalysis } from '../config/exportAnalysis'
@@ -54,8 +55,8 @@ export default function ExplorerLayout({
     <div className="explorer">
       <aside className="explorer-sidebar">
         <div className="explorer-brand">
-          <div className="brand-title">CodeLens</div>
-          <div className="brand-subtitle">AI-Powered Codebase Explorer</div>
+          <Brand light />
+          <div className="brand-subtitle">Your codebase workspace</div>
         </div>
 
         <div className="sidebar-card">
@@ -179,8 +180,8 @@ export default function ExplorerLayout({
               </>
             ) : (
               <>
-                <div className="project-name">No project loaded</div>
-                <div className="project-sub">Analyze a GitHub repo or upload a ZIP</div>
+                <div className="project-name">Your workspace</div>
+                <div className="project-sub">A new perspective on your next project</div>
               </>
             )}
 
@@ -256,14 +257,16 @@ export default function ExplorerLayout({
 
           </Suspense></ErrorBoundary>
           {!analyzing && !analysisData && (
-            <div className="explorer-empty explorer-welcome">
-              <h3>Ready to explore</h3>
-              <p>Paste a public GitHub URL or upload a ZIP, then click <strong>Analyze Project</strong>.</p>
-              <ul>
-                <li>Cached repos re-analyze in seconds when nothing changed</li>
-                <li>Use the Graph tab for import relationships</li>
-                <li>Ask questions in Q&amp;A after analysis completes</li>
-              </ul>
+            <div className="workspace-welcome">
+              <p className="eyebrow">A GOOD PLACE TO BEGIN</p>
+              <h1>Make yourself at home<br />in any codebase.</h1>
+              <p>Bring a project into your workspace. We’ll help you see the structure, follow the connections, and find your next step.</p>
+              <div className="workspace-steps">
+                <article><span>01 / IMPORT</span><h2>Choose your starting point</h2><p>Use the source panel to paste a public GitHub URL or choose a ZIP, then select Analyze Project.</p></article>
+                <article><span>02 / EXPLORE</span><h2>Follow the connections</h2><p>Move between the overview, source tree, and dependency graph. Open a file to look closer.</p></article>
+                <article><span>03 / UNDERSTAND</span><h2>Keep your context</h2><p>Return to saved analyses, export a report, or explore tutorials and Q&A when AI is available.</p></article>
+              </div>
+              <p className="workspace-hint">Beta tip: start with public or non-sensitive code you have permission to share.</p>
             </div>
           )}
         </div>

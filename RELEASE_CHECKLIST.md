@@ -39,3 +39,7 @@ This is a work plan, not a security certification. Leave items unchecked until t
 ## Release evidence
 
 For each release, record the commit or version, deployment date, environment, checks performed, results, known limitations, rollback target, and person responsible. Do not record passwords, API keys, or customer source in this document.
+
+### Website redesign verification — 2026-10-12
+
+The public landing page, sign-in, workspace styling, metadata, and product-first README were added. Lint, the production build, 40 backend tests, and the production smoke passed during this change. Browser verification remains incomplete: a landing FAQ selector was corrected after a timeout, and a later mobile import check timed out. Re-run both browser suites before release; do not treat this change as public-launch approval.
