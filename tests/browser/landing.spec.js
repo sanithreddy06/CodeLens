@@ -10,7 +10,7 @@ test('public website previews the product and leads into the workspace', async (
   await expect(page.getByRole('heading', { name: 'Go straight to the source.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Read the source' })).toHaveAttribute('aria-pressed', 'true');
   await page.locator('summary').filter({ hasText: 'Can I create an account?' }).click();
-  await expect(page.getByText('Sign in with your CodeLens account.', { exact: false })).toBeVisible();
+  await expect(page.getByText(/Choose Create account on the sign-in page/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('website.png'), fullPage: true });
   await page.getByRole('link', { name: 'Open your workspace' }).click();
