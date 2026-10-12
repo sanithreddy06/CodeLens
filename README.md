@@ -19,7 +19,7 @@ Settings include light, dark, and system themes, source text size and wrapping, 
 
 The website includes a responsive public landing page, interactive product illustration, dedicated sign-in experience, and a focused analysis workspace. Importing sits in the main panel; project history and account controls stay in the sidebar, with expandable navigation on mobile. Illustrations are labelled examples; they do not represent live AI results.
 
-**Account access:** accounts are created by the workspace administrator. Public signup, password recovery, billing, and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
+**Account access:** create an account from the sign-in page using a complete email address and a 12–256 character password. Signup validates address format; inbox ownership verification is not implemented. MEMBER_EMAILS restrictions still apply. Password recovery, billing, and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
 
 ![CodeLens workspace](docs/images/workspace.png)
 

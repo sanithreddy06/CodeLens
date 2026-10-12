@@ -36,6 +36,9 @@ function analysisKey(email, source) {
   return JSON.stringify([String(email).trim().toLowerCase(), String(source).trim().replace(/\/$/, '').replace(/\.git$/, '').toLowerCase()]);
 }
 function getUser(email) { return getDb().prepare('SELECT * FROM users WHERE email = ?').get(email); }
+function createUser(email, passwordHash) {
+  return getDb().prepare('INSERT INTO users VALUES (?, ?, ?) ON CONFLICT(email) DO NOTHING').run(email, passwordHash, Date.now()).changes === 1;
+}
 function saveUser(email, passwordHash) {
   getDb().prepare('INSERT INTO users VALUES (?, ?, ?) ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash').run(email, passwordHash, Date.now());
   getDb().prepare("DELETE FROM sessions WHERE json_extract(user_json, '$.email') = ?").run(email);
@@ -142,4 +145,4 @@ function deleteJob(id) {
   if (job?.resultKey) getDb().prepare('DELETE FROM analyses WHERE key=? AND NOT EXISTS (SELECT 1 FROM jobs WHERE result_key=?)').run(job.resultKey, job.resultKey);
 }
 function close() { db?.close(); db = null; }
-module.exports = { DB_PATH, getDb, getUser, saveUser, analysisKey, createSession, getSession, deleteSession, sweepExpiredSessions, countSessions, getAnalysis, hasAnalysis, checkStorageQuota, chargeAiCall, getMessages, saveExchange, latestAnalysis, upsertAnalysis, createJob, getJob, listJobs, pendingCount, nextJob, recoverInterruptedJobs, updateJobProgress, completeJob, failJob, cancelJob, deleteJob, close };
+module.exports = { DB_PATH, getDb, getUser, saveUser, createUser, analysisKey, createSession, getSession, deleteSession, sweepExpiredSessions, countSessions, getAnalysis, hasAnalysis, checkStorageQuota, chargeAiCall, getMessages, saveExchange, latestAnalysis, upsertAnalysis, createJob, getJob, listJobs, pendingCount, nextJob, recoverInterruptedJobs, updateJobProgress, completeJob, failJob, cancelJob, deleteJob, close };

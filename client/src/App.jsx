@@ -83,11 +83,11 @@ function App() {
       setNextOffset(json.nextOffset)
     } catch (err) { setError(err.message) }
   }
-  const handleLogin = async (email, password) => {
+  const handleLogin = async (email, password, signup = false) => {
     if (loggingIn) return
     setLoggingIn(true); setError(null)
     try {
-      const json = await apiRequest('/auth/login', { method: 'POST', body: { email, password } })
+      const json = await apiRequest(signup ? '/auth/signup' : '/auth/login', { method: 'POST', body: { email, password } })
       setUser(json.user)
       setAiEnabled(Boolean(json.ai?.enabled))
       await refreshHistory()
@@ -155,7 +155,7 @@ function App() {
     } catch (err) { setError(err.message) }
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
-  if (!user) return ['#signin', '#settings'].includes(page) ? <LoginPage onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
+  if (!user) return ['#signin', '#signup', '#settings'].includes(page) ? <LoginPage key={page} signup={page === '#signup'} onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
   return <ExplorerLayout {...preferenceState} showingSettings={page === '#settings'} onSettings={() => { window.location.hash = 'settings'; window.scrollTo(0, 0) }} onWorkspace={() => { window.location.hash = 'workspace'; window.scrollTo(0, 0) }} user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
     analysisJob={analysisJob} analysisStartedAt={analysisJob?.createdAt} onAnalyzeGithub={analyzeGithub}
     onAnalyzeZip={analyzeZip} analyzing={analyzing} history={history} onOpenJob={id => runJob(async () => id)}

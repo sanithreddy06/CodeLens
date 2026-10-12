@@ -6,7 +6,16 @@ const { hashPassword, verifyPassword } = require('./passwords');
 const COOKIE = 'codelens_session';
 let dummyHash;
 const normalizeEmail = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
-const validEmail = value => /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(value) && value.length <= 254;
+function validEmail(value) {
+  if (typeof value !== 'string' || value.length > 254) return false;
+  const parts = value.split('@');
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  return local.length > 0 && local.length <= 64 && /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)
+    && !local.startsWith('.') && !local.endsWith('.') && !local.includes('..')
+    && domain.split('.').length >= 2 && /^[a-z]{2,63}$/i.test(domain.split('.').at(-1))
+    && domain.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label));
+}
 async function initialize() {
   dummyHash = await hashPassword(crypto.randomBytes(32).toString('hex'));
   // Bootstrap only missing accounts. Password changes use the account command.
@@ -42,6 +51,9 @@ async function login(req, res) {
   const valid = await verifyPassword(password, user?.password_hash || dummyHash);
   if (!user || !valid) return res.status(401).json({ error: 'Invalid email or password.' });
   if (!allowedMember(email)) return res.status(403).json({ error: 'This account does not have access.' });
+  return startSession(req, res, email);
+}
+function startSession(req, res, email) {
   const previous = readToken(req);
   if (previous) store.deleteSession(previous);
   const token = crypto.randomBytes(32).toString('hex');
@@ -49,6 +61,22 @@ async function login(req, res) {
   store.createSession(token, publicUser, Date.now() + config.sessionTtl);
   res.cookie(COOKIE, token, cookieOptions());
   return res.json({ success: true, user: publicUser, csrfToken: csrfToken(token), ai: aiAvailability() });
+}
+let registrations = 0;
+async function signup(req, res) {
+  const email = normalizeEmail(req.body?.email);
+  const password = req.body?.password;
+  if (!validEmail(email)) return res.status(400).json({ error: 'Enter a complete email address, such as you@gmail.com.' });
+  if (typeof password !== 'string' || password.length < 12 || password.length > 256) return res.status(400).json({ error: 'Use a password with 12–256 characters.' });
+  if (!allowedMember(email)) return res.status(403).json({ error: 'Account creation is restricted for this workspace.' });
+  if (registrations >= 2) return res.status(429).json({ error: 'Account creation is busy. Please try again shortly.' });
+  registrations++;
+  try {
+    const hash = await hashPassword(password);
+    if (!store.createUser(email, hash)) return res.status(409).json({ error: 'Unable to create this account. If you already have an account, sign in.' });
+    res.status(201);
+    return startSession(req, res, email);
+  } finally { registrations--; }
 }
 function required(req, res, next) {
   const token = readToken(req);
@@ -69,4 +97,4 @@ function logout(req, res) {
   res.clearCookie(COOKIE, { ...cookieOptions(), maxAge: undefined });
   res.json({ success: true });
 }
-module.exports = { initialize, login, required, me, logout, normalizeEmail, validEmail };
+module.exports = { initialize, login, signup, required, me, logout, normalizeEmail, validEmail };

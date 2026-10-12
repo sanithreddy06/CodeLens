@@ -11,7 +11,7 @@ const samples = {
 const questions = [
   ['What can I import?', 'Public GitHub repositories and ZIP archives. File and size limits apply; your analysis shows which files were included. Private GitHub integration is not available yet.'],
   ['Do I need AI to use CodeLens?', 'Source browsing, metrics, dependency graphs, and saved history work without AI. Tutorials and Q&A are available when the deployment has an AI provider configured.'],
-  ['Can I create an account?', 'Sign in with your CodeLens account. Contact your workspace administrator if you need an account or help resetting your password.'],
+  ['Can I create an account?', 'Yes. Choose Create account on the sign-in page and use your email address and a password with at least 12 characters.'],
   ['What happens to my code?', 'Imports and analyses are saved to your account. Selected excerpts may be sent to the configured AI provider. Only upload code you have permission to share. Secret redaction cannot guarantee removal of every credential.'],
 ]
 export default function LandingPage() {
