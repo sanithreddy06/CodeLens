@@ -2,12 +2,12 @@
 
 This is a work plan, not a security certification. Leave items unchecked until there is recorded evidence that they work in the deployed environment. Deployment instructions are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
-## Invitation-only beta
+## Controlled release
 
 - [ ] Deploy a production build with fake AI disabled, HTTPS, persistent storage, and unique account passwords.
 - [ ] Verify login, logout, import, source browsing, history deletion, restart recovery, and AI-disabled behavior on the deployed service.
 - [ ] Keep one application instance while the queue and SQLite database use local storage.
-- [ ] Limit access to invited testers and explain that only public or non-sensitive code should be uploaded during the beta.
+- [ ] Limit access to invited testers and explain that only public or non-sensitive code should be uploaded during the controlled release.
 - [ ] Configure uptime checks, error alerts, and a support contact; keep credentials and uploaded source out of logs.
 - [ ] Schedule offsite backups with restricted access, encryption, and expiration; restore a backup into an isolated instance.
 - [ ] Record a working release and verify how to roll back without losing stored data.
@@ -44,4 +44,6 @@ For each release, record the commit or version, deployment date, environment, ch
 
 The public page, sign-in, and analysis workspace now share a minimal visual system. The import form sits in the main workspace, mobile navigation expands on demand, repeated stats were removed, and deleting a saved analysis requires confirmation. Screenshots were reviewed for desktop and mobile.
 
-Verified locally: frontend lint and production build, 40 backend tests, 10 desktop/mobile browser workflow checks, 2 browser checks without AI configuration, and the production smoke. The prior unfinished browser checks are resolved. Browser tests use temporary data and fake AI; real-provider quality and the public-launch checklist remain separate work.
+Verified locally: frontend lint and production build, 40 backend tests, 12 desktop/mobile browser workflow checks, 2 browser checks without AI configuration, and the production smoke. The prior unfinished browser checks are resolved. Browser tests use temporary data and fake AI; real-provider quality and the public-launch checklist remain separate work.
+
+Settings verification includes saved preferences after reload, live system-theme changes, light/dark public and sign-in pages, source text size and wrapping, default import choice, preference reset without deleting projects, and history filtering.

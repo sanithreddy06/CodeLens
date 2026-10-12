@@ -1,6 +1,6 @@
 const { defineConfig, devices } = require('@playwright/test');
 module.exports = defineConfig({
-  testDir: './tests/browser', testMatch: '**/{explorer,landing}.spec.js', workers: 1, timeout: 45000,
+  testDir: './tests/browser', testMatch: '**/{explorer,landing,settings}.spec.js', workers: 1, timeout: 45000,
   use: { baseURL: 'http://127.0.0.1:5098', trace: 'retain-on-failure' },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },

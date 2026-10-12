@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
 import './product.css'
+import './settings.css'
+import usePreferences from './hooks/usePreferences'
 import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
 import ExplorerLayout from './components/ExplorerLayout'
@@ -14,6 +16,7 @@ const wait = (ms, signal) => new Promise((resolve, reject) => {
   signal.addEventListener('abort', abort, { once: true })
 })
 function App() {
+  const preferenceState = usePreferences()
   const [page, setPage] = useState(window.location.hash)
   const [user, setUser] = useState(null)
   const [aiEnabled, setAiEnabled] = useState(false)
@@ -39,8 +42,7 @@ function App() {
   useEffect(() => {
     const controller = new AbortController()
     // Remove credentials from the previous bearer-token implementation.
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('authUser')
+    try { localStorage.removeItem('authToken'); localStorage.removeItem('authUser') } catch { /* Cookie sessions work when local storage is blocked. */ }
     async function restore() {
       try {
         const session = await apiRequest('/auth/me', { signal: controller.signal })
@@ -153,8 +155,8 @@ function App() {
     } catch (err) { setError(err.message) }
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
-  if (!user) return page === '#signin' ? <LoginPage onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
-  return <ExplorerLayout user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
+  if (!user) return ['#signin', '#settings'].includes(page) ? <LoginPage onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
+  return <ExplorerLayout {...preferenceState} showingSettings={page === '#settings'} onSettings={() => { window.location.hash = 'settings'; window.scrollTo(0, 0) }} onWorkspace={() => { window.location.hash = 'workspace'; window.scrollTo(0, 0) }} user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
     analysisJob={analysisJob} analysisStartedAt={analysisJob?.createdAt} onAnalyzeGithub={analyzeGithub}
     onAnalyzeZip={analyzeZip} analyzing={analyzing} history={history} onOpenJob={id => runJob(async () => id)}
     onCancel={cancel} onDeleteJob={remove} onLoadMore={loadMore} hasMore={nextOffset !== null} onRetryTutorials={retryTutorials} />

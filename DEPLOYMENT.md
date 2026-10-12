@@ -1,6 +1,6 @@
 # Deploy CodeLens now; add AI keys later
 
-For beta and public-launch readiness checks, see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). A successful deployment alone does not verify launch readiness.
+For staged-release and public-launch readiness checks, see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). A successful deployment alone does not verify launch readiness.
 
 No paid AI API or GitHub token is needed to start. CodeLens will import ZIPs and public GitHub repositories, compute source metrics/import graphs, search source, retain history, and export reports. Tutorials and Q&A stay explicitly unavailable until AI is configured. GitHub imports still need internet access and are subject to GitHub's unauthenticated limits.
 
