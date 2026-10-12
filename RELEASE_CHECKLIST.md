@@ -42,4 +42,6 @@ For each release, record the commit or version, deployment date, environment, ch
 
 ### Website redesign verification — 2026-10-12
 
-The public landing page, sign-in, workspace styling, metadata, and product-first README were added. Lint, the production build, 40 backend tests, and the production smoke passed during this change. Browser verification remains incomplete: a landing FAQ selector was corrected after a timeout, and a later mobile import check timed out. Re-run both browser suites before release; do not treat this change as public-launch approval.
+The public page, sign-in, and analysis workspace now share a minimal visual system. The import form sits in the main workspace, mobile navigation expands on demand, repeated stats were removed, and deleting a saved analysis requires confirmation. Screenshots were reviewed for desktop and mobile.
+
+Verified locally: frontend lint and production build, 40 backend tests, 10 desktop/mobile browser workflow checks, 2 browser checks without AI configuration, and the production smoke. The prior unfinished browser checks are resolved. Browser tests use temporary data and fake AI; real-provider quality and the public-launch checklist remain separate work.

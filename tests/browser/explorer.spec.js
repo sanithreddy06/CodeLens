@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.getByLabel('Email address').fill('browser@example.com');
   await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  await expect(page.locator('.project-name')).toHaveText('Your projects');
 });
 async function upload(page, name) {
   await page.getByRole('radio', { name: 'Upload ZIP' }).check();
@@ -49,6 +49,8 @@ test('import, source navigation, graph, persistent chat, and tutorials', async (
   await page.getByRole('button', { name: '1. Entry Point', exact: true }).click();
   await expect(page.locator('.chapter-content h1')).toBeVisible();
   await page.reload();
+  const projectMenu = page.getByRole('button', { name: 'Projects & account' });
+  if (await projectMenu.isVisible()) await projectMenu.click();
   await page.locator('.history-row > button:first-child').first().click();
   await expect(page.getByRole('button', { name: 'Q&A', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Q&A', exact: true }).click();
@@ -57,6 +59,8 @@ test('import, source navigation, graph, persistent chat, and tutorials', async (
   expect(errors).toEqual([]);
 });
 test('session expiry returns to login without exposing saved source', async ({ page, context }) => {
+  const projectMenu = page.getByRole('button', { name: 'Projects & account' });
+  if (await projectMenu.isVisible()) await projectMenu.click();
   await context.clearCookies();
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
@@ -68,4 +72,31 @@ test('running analysis can be cancelled from the interface', async ({ page }) =>
   await page.getByRole('button', { name: 'Analyze Project', exact: true }).click();
   await page.getByRole('button', { name: 'Cancel analysis' }).click();
   await expect(page.locator('.sidebar-error')).toContainText('Cancelled');
+});
+
+test('new import can be dismissed and saved analysis deletion needs confirmation', async ({ page }, testInfo) => {
+  const projectName = `navigation-${testInfo.project.name}`;
+  await upload(page, `${projectName}.zip`);
+  await expect(page.locator('.project-name')).toHaveText(projectName, { timeout: 20000 });
+  await page.getByRole('button', { name: 'New analysis' }).click();
+  await expect(page.getByRole('heading', { name: 'Import a codebase' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Upload ZIP' }).check();
+  await page.locator('input[type=file]').setInputFiles({ name: 'wrong.txt', mimeType: 'text/plain', buffer: Buffer.from('not a zip') });
+  await expect(page.getByRole('alert')).toContainText('Choose a ZIP archive');
+  await expect(page.getByRole('button', { name: 'Analyze Project', exact: true })).toBeDisabled();
+  await page.getByRole('radio', { name: 'GitHub URL' }).check();
+  await expect(page.getByText('Choose a ZIP archive to continue.')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Close import panel' }).click();
+  await expect(page.locator('.project-name')).toHaveText(projectName);
+  const projectMenu = page.getByRole('button', { name: 'Projects & account' });
+  if (await projectMenu.isVisible()) await projectMenu.click();
+  const row = page.locator('.history-row').filter({ hasText: `${projectName}.zip` });
+  await row.hover();
+  await row.getByRole('button', { name: `Delete ${projectName}.zip`, exact: true }).click();
+  await page.getByRole('button', { name: 'Keep', exact: true }).click();
+  await expect(row).toBeVisible();
+  await row.getByRole('button', { name: `Delete ${projectName}.zip`, exact: true }).click();
+  await page.getByRole('button', { name: 'Delete analysis', exact: true }).click();
+  await expect(row).toHaveCount(0);
+  await expect(page.locator('.project-name')).toHaveText('Your projects');
 });

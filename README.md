@@ -1,6 +1,6 @@
 # CodeLens
 
-### Less lost in code. More building.
+### Understand the code. Find your next step.
 
 A website for developers and students to understand unfamiliar codebases. Bring a public GitHub repository or project ZIP, explore its structure, and learn how the pieces fit together.
 
@@ -15,9 +15,11 @@ CodeLens is a browser-based product for developers joining unfamiliar projects a
 - **Learn in context:** use guided tutorials and source-backed Q&A when AI is configured.
 - **Keep your progress:** reopen saved analyses and export a Markdown report.
 
-The website includes a responsive public landing page, interactive product illustration, dedicated sign-in experience, and desktop/mobile workspace. Illustrations are labelled examples; they do not represent live AI results.
+The website includes a responsive public landing page, interactive product illustration, dedicated sign-in experience, and a focused analysis workspace. Importing sits in the main panel; project history and account controls stay in the sidebar, with expandable navigation on mobile. Illustrations are labelled examples; they do not represent live AI results.
 
 **Release status:** invitation-only beta. Public signup, password recovery, billing, and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
+
+![CodeLens workspace](docs/images/workspace.png)
 
 ## Host the website
 

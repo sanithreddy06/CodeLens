@@ -51,7 +51,8 @@ export default function GraphTab({ data, onOpenSource }) {
     <div ref={container} style={{ height: 480, overflow: 'hidden', border: '1px solid var(--border)', borderRadius: 12 }}>
       <ForceGraph2D width={width} height={480} graphData={graph}
         nodeLabel={node => String(node.label).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}
-        nodeColor={node => node.type === 'file' ? '#818cf8' : node.type === 'builtin' ? '#34d399' : '#f59e0b'}
+        nodeColor={node => node.type === 'file' ? '#667cc3' : node.type === 'builtin' ? '#4e9b84' : '#c29b5a'}
+        linkColor={() => '#bac4d8'}
         onNodeClick={node => { if (node.type === 'file') onOpenSource({ path: node.id }) }}
         linkDirectionalArrowLength={3} linkDirectionalArrowRelPos={1} cooldownTicks={100} />
     </div>

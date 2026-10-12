@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const STEPS = [
   { icon: '📥', label: 'Fetch source' },
@@ -8,9 +8,6 @@ const STEPS = [
   { icon: '✍️', label: 'Write tutorials' },
   { icon: '✨', label: 'Finalize' },
 ]
-
-/** Rough seconds per pipeline step (for ETA display). */
-const STEP_SECONDS = [25, 18, 18, 4, 45, 5]
 
 function formatDuration(totalSeconds) {
   const s = Math.max(0, Math.round(totalSeconds))
@@ -41,11 +38,7 @@ export default function AnalysisProgress({ repoUrl, progress, status, startedAt 
         : 'Starting analysis…')
 
   const elapsedSec = startedAt ? (now - startedAt) / 1000 : 0
-  const etaSec = useMemo(() => {
-    if (step <= 0) return STEP_SECONDS.reduce((a, b) => a + b, 0)
-    const remaining = STEP_SECONDS.slice(Math.min(step, STEP_SECONDS.length)).reduce((a, b) => a + b, 0)
-    return Math.max(8, remaining - elapsedSec * 0.15)
-  }, [step, elapsedSec])
+
 
   return (
     <div className="analysis-progress-wrap">
@@ -54,17 +47,15 @@ export default function AnalysisProgress({ repoUrl, progress, status, startedAt 
           <h2>Analyzing project</h2>
           <div className="progress-timers">
             <span className="progress-timer">Elapsed {formatDuration(elapsedSec)}</span>
-            {step > 0 && step < total && (
-              <span className="progress-timer muted">~{formatDuration(etaSec)} left</span>
-            )}
+
           </div>
         </div>
         <p className="subtitle progress-source" title={repoUrl}>{repoUrl}</p>
 
-        <div className="progress-bar-track progress-bar-track-lg">
+        <div className="progress-bar-track progress-bar-track-lg" role="progressbar" aria-label="Analysis progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
           <div className="progress-bar-fill progress-bar-animated" style={{ width: `${Math.max(pct, 3)}%` }} />
         </div>
-        <p className="progress-message">
+        <p className="progress-message" role="status">
           {message}
           <span className="progress-step-count">Step {Math.min(step, total)} of {total}</span>
         </p>
@@ -76,7 +67,7 @@ export default function AnalysisProgress({ repoUrl, progress, status, startedAt 
             const active = step === stepIndex || (step === 0 && stepIndex === 1 && status === 'running')
             return (
               <div key={s.label} className={`progress-step-chip ${active ? 'active' : ''} ${done ? 'done' : ''}`}>
-                <span className="progress-step-icon" aria-hidden>{s.icon}</span>
+                <span className="progress-step-icon" aria-hidden>{done ? '✓' : stepIndex}</span>
                 <span className="progress-step-label">{s.label}</span>
               </div>
             )

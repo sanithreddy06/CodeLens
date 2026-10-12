@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 const OverviewTab = lazy(() => import('./tabs/OverviewTab'))
 const StructureTab = lazy(() => import('./tabs/StructureTab'))
 const GraphTab = lazy(() => import('./tabs/GraphTab'))
@@ -6,272 +6,64 @@ const QATab = lazy(() => import('./tabs/QATab'))
 const TutorialsTab = lazy(() => import('./tabs/TutorialsTab'))
 import AnalysisProgress from './AnalysisProgress'
 import { Brand } from './LandingPage'
+import ImportProject from './ImportProject'
 import SourceViewer from './SourceViewer'
 import ErrorBoundary from './ErrorBoundary'
 import { downloadAnalysis } from '../config/exportAnalysis'
 
-const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'structure', label: 'Structure' },
-  { id: 'graph', label: 'Graph' },
-  { id: 'qa', label: 'Q&A' },
-  { id: 'tutorials', label: 'Tutorials' },
-]
+const TABS = [{ id: 'overview', label: 'Overview' }, { id: 'structure', label: 'Structure' }, { id: 'graph', label: 'Graph' }, { id: 'qa', label: 'Q&A' }, { id: 'tutorials', label: 'Tutorials' }]
+const statusLabel = status => ({ done: 'Ready', queued: 'Queued', running: 'Analyzing', failed: 'Failed', cancelled: 'Cancelled', expired: 'Expired' }[status] || status)
 
-export default function ExplorerLayout({
-  user,
-  aiEnabled,
-  onLogout,
-  error,
-  analysisData,
-  analysisJob,
-  analysisStartedAt,
-  onAnalyzeGithub,
-  onAnalyzeZip,
-  analyzing,
-  history,
-  onOpenJob,
-  onCancel,
-  onDeleteJob,
-  onLoadMore,
-  hasMore,
-  onRetryTutorials,
-}) {
-  const [sourceType, setSourceType] = useState('github') // github | zip
-  const [repoUrl, setRepoUrl] = useState('')
-  const [zipFile, setZipFile] = useState(null)
+export default function ExplorerLayout({ user, aiEnabled, onLogout, error, analysisData, analysisJob, analysisStartedAt, onAnalyzeGithub, onAnalyzeZip, analyzing, history, onOpenJob, onCancel, onDeleteJob, onLoadMore, hasMore, onRetryTutorials }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [source, setSource] = useState(null)
+  const [showImport, setShowImport] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState(null)
+  const [navigationOpen, setNavigationOpen] = useState(false)
   const openSource = value => setSource({ ...value, jobId: analysisData.jobId })
+  const start = action => value => { setShowImport(false); setActiveTab('overview'); action(value) }
+  const openJob = id => { setNavigationOpen(false); setShowImport(false); setActiveTab('overview'); onOpenJob(id) }
 
-  const stats = useMemo(() => analysisData?.metrics || null, [analysisData])
-
-  const handleAnalyze = async () => {
-    if (sourceType === 'github') return onAnalyzeGithub(repoUrl)
-    return onAnalyzeZip(zipFile)
-  }
-
-  return (
-    <div className="explorer">
-      <aside className="explorer-sidebar">
-        <div className="explorer-brand">
-          <Brand light />
-          <div className="brand-subtitle">Your codebase workspace</div>
-        </div>
-
-        <div className="sidebar-card">
-          <div className="sidebar-card-title">Signed in</div>
-          <div className="sidebar-user">
-            <div className="sidebar-user-email" title={user?.email}>{user?.email}</div>
-            <button className="btn btn-ghost" onClick={onLogout} type="button">
-              Sign out
-            </button>
-          </div>
-        </div>
-
-        <div className="sidebar-card">
-          <div className="sidebar-card-title">Source</div>
-          <label className="radio-row">
-            <input
-              type="radio"
-              name="sourceType"
-              value="zip"
-              checked={sourceType === 'zip'}
-              onChange={() => setSourceType('zip')}
-            />
-            <span>Upload ZIP</span>
-          </label>
-          <label className="radio-row">
-            <input
-              type="radio"
-              name="sourceType"
-              value="github"
-              checked={sourceType === 'github'}
-              onChange={() => setSourceType('github')}
-            />
-            <span>GitHub URL</span>
-          </label>
-
-          {sourceType === 'github' ? (
-            <div className="sidebar-field">
-              <div className="sidebar-field-label">GitHub repository</div>
-              <input
-                className="sidebar-input"
-                placeholder="https://github.com/owner/repo"
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-                disabled={analyzing}
-              />
-            </div>
-          ) : (
-            <div className="sidebar-field">
-              <div className="sidebar-field-label">Upload project ZIP</div>
-              <div className="zip-drop">
-                <div className="zip-drop-title">Choose a project archive</div>
-                <div className="zip-drop-subtitle">Limit 50MB per file · ZIP</div>
-                <input
-                  type="file"
-                  accept=".zip"
-                  onChange={(e) => setZipFile(e.target.files?.[0] || null)}
-                  disabled={analyzing}
-                />
-              </div>
-              {zipFile && (
-                <div className="zip-selected" title={zipFile.name}>
-                  {zipFile.name} ({Math.round(zipFile.size / 1024)} KB)
-                </div>
-              )}
-            </div>
-          )}
-
-          <button
-            className="btn btn-primary sidebar-analyze"
-            type="button"
-            onClick={handleAnalyze}
-            disabled={analyzing || (sourceType === 'github' ? !repoUrl.trim() : !zipFile)}
-          >
-            {analyzing ? 'Analyzing…' : 'Analyze Project'}
-          </button>
-
-          {error && <div className="sidebar-error">⚠️ {error}</div>}
-        </div>
-
-        <div className="sidebar-card">
-          <div className="sidebar-card-title">Recent analyses</div>
-          {!history.length && <p className="history-empty">Your analyses will appear here.</p>}
-          <div className="history-list">
-            {history.map(job => <div className="history-row" key={job.id}>
-              <button type="button" disabled={analyzing} onClick={() => onOpenJob(job.id)} title={job.name}>
-                <span>{job.name?.split('/').pop() || 'Project'}</span>
-                <small>{job.status} · {new Date(job.createdAt).toLocaleDateString()}</small>
-              </button>
-              {!['queued', 'running'].includes(job.status) && <button className="history-delete" type="button" aria-label={`Delete ${job.name}`} disabled={analyzing} onClick={() => onDeleteJob(job.id)}>×</button>}
-            </div>)}
-          </div>
-        </div>
-
-        {hasMore && <button className="btn btn-ghost" onClick={onLoadMore} disabled={analyzing}>Load older analyses</button>}
-
-        {stats && (
-          <div className="sidebar-card">
-            <div className="sidebar-card-title">Stats</div>
-            <div className="sidebar-stats">
-              <div><span className="k">Files</span><span className="v">{stats.files}</span></div>
-              <div><span className="k">Functions</span><span className="v">{stats.functions}</span></div>
-              <div><span className="k">Classes</span><span className="v">{stats.classes}</span></div>
-              <div><span className="k">Edges</span><span className="v">{stats.edges}</span></div>
-              <div><span className="k">Ext deps</span><span className="v">{stats.extDeps}</span></div>
-            </div>
-          </div>
-        )}
-      </aside>
-
-      <main className="explorer-main">
-        <div className="explorer-topbar">
-          {analysisData && <button className="btn btn-ghost" onClick={() => downloadAnalysis(analysisData)}>Download report</button>}
-          <div className="explorer-project">
-            {analysisData ? (
-              <>
-                <div className="project-name">{analysisData.projectName}</div>
-                <div className="project-sub">
-                  Exploring {analysisData.projectName}
-                  {analysisData.cached && <span className="cache-badge" title="Identical source was analyzed before — result served from cache without re-running the AI">⚡ Cached</span>}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="project-name">Your workspace</div>
-                <div className="project-sub">A new perspective on your next project</div>
-              </>
-            )}
-
-            <style>{`
-              .cache-badge {
-                display: inline-block;
-                margin-left: 8px;
-                padding: 2px 8px;
-                font-size: 11px;
-                font-weight: 600;
-                color: var(--accent);
-                background: color-mix(in srgb, var(--accent) 12%, transparent);
-                border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-                border-radius: 999px;
-                vertical-align: middle;
-              }
-            `}</style>
-          </div>
-        </div>
-
-        <div className="explorer-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className={`tab ${activeTab === t.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(t.id)}
-              type="button"
-              disabled={!analysisData}
-              title={!analysisData ? 'Run an analysis to unlock tabs' : undefined}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="explorer-content">
-          {!aiEnabled && <div className="analysis-stale-banner" role="status">AI is not configured yet. Import a project to browse source files and dependency graphs.</div>}
-          {analysisData?.aiUnavailable && aiEnabled && <div className="analysis-stale-banner">This project was imported before AI was enabled. <button className="btn btn-ghost" disabled={analyzing} onClick={onRetryTutorials}>Generate tutorials</button></div>}
-          {analyzing && (
-            <>
-              <AnalysisProgress
-                repoUrl={analysisJob?.name || 'Loading project…'}
-                progress={analysisJob?.progress}
-                status={analysisJob?.status}
-                startedAt={analysisStartedAt}
-              />
-              {analysisJob && <button className="btn btn-ghost" type="button" onClick={onCancel}>Cancel analysis</button>}
-              {analysisData && (
-                <div className="analysis-stale-banner">
-                  Showing your previous results below while the new analysis runs.
-                </div>
-              )}
-            </>
-          )}
-
-          {analysisData?.demoMode && <div className="analysis-stale-banner">Demo mode: explanations are sample responses, not AI analysis of this project.</div>}
-          {analysisData?.analysisWarning && <div className="sidebar-error" role="status">Tutorial generation was incomplete. Completed chapters and file exploration are available. <button className="btn btn-ghost" disabled={analyzing || !aiEnabled} onClick={onRetryTutorials}>Retry missing tutorials</button></div>}
-          {analysisData?.coverage && <p className="coverage-summary">Analyzed {analysisData.coverage.analyzedFiles} of {analysisData.coverage.totalFiles} files · {analysisData.coverage.skippedFiles} excluded or over limits</p>}
-          {analysisData?.redactedValues > 0 && <p className="coverage-summary">{analysisData.redactedValues} possible credential(s) redacted from imported source.</p>}
-          {analysisData?.revision && <p className="coverage-summary">Revision <code>{analysisData.revision.slice(0, 12)}</code> · Function and class counts may be estimates for unsupported languages.</p>}
-          <ErrorBoundary key={`${analysisData?.jobId}:${activeTab}`}><Suspense fallback={<div className="explorer-empty" role="status">Loading view…</div>}>
-          {(!analyzing || analysisData) && (
-            <>
-              {activeTab === 'overview' && <OverviewTab data={analysisData} />}
-              {activeTab === 'structure' && <StructureTab data={analysisData} onOpenSource={openSource} />}
-              {activeTab === 'graph' && <GraphTab data={analysisData} onOpenSource={openSource} />}
-              {activeTab === 'qa' && (
-                <QATab key={analysisData?.jobId} data={analysisData} aiEnabled={aiEnabled} onOpenSource={openSource} />
-              )}
-              {activeTab === 'tutorials' && <TutorialsTab key={analysisData?.jobId} data={analysisData} onOpenSource={openSource} />}
-            </>
-          )}
-
+  return <div className="explorer">
+    <a className="skip-link" href="#workspace-content">Skip to workspace</a>
+    <aside className="explorer-sidebar" aria-label="Workspace navigation">
+      <div className="explorer-brand"><Brand light /><span className="workspace-label">WORKSPACE</span></div>
+      <button className="new-analysis-button" type="button" disabled={analyzing} onClick={() => { setShowImport(true); setNavigationOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }) }}><span aria-hidden="true">+</span> New analysis</button>
+      <button className="mobile-project-toggle" type="button" aria-expanded={navigationOpen} aria-controls="workspace-navigation" onClick={() => setNavigationOpen(!navigationOpen)}>Projects &amp; account <span aria-hidden="true">{navigationOpen ? '−' : '+'}</span></button>
+      <div id="workspace-navigation" className={`sidebar-navigation${navigationOpen ? ' navigation-expanded' : ''}`}>
+      <div className="history-heading">Recent analyses{history.length > 0 && <span>{history.length}{hasMore ? '+' : ''}</span>}</div>
+      {!history.length && <p className="history-empty">Your imported projects will appear here.</p>}
+      <nav className="history-list" aria-label="Recent analyses">{history.map(job => <div className={`history-row${analysisData?.jobId === job.id ? ' current' : ''}`} key={job.id}>
+        <button type="button" disabled={analyzing} onClick={() => openJob(job.id)} title={job.name} aria-current={analysisData?.jobId === job.id ? 'page' : undefined}><span>{job.name?.split('/').pop() || 'Project'}</span><small><i className={`job-status status-${job.status}`} aria-hidden="true" />{statusLabel(job.status)} · {new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</small></button>
+        {!['queued', 'running'].includes(job.status) && <button className="history-delete" type="button" aria-label={`Delete ${job.name}`} disabled={analyzing} onClick={() => setPendingDelete(job)}>×</button>}
+      </div>)}</nav>
+      {pendingDelete && <div className="delete-confirm" role="group" aria-label="Confirm analysis deletion"><p>Delete “{pendingDelete.name?.split('/').pop() || 'Project'}” and its conversation?</p><div><button className="btn btn-ghost" onClick={() => setPendingDelete(null)}>Keep</button><button className="btn danger-button" disabled={analyzing} onClick={() => { onDeleteJob(pendingDelete.id); setPendingDelete(null) }}>Delete analysis</button></div></div>}
+      {hasMore && <button className="history-more" onClick={onLoadMore} disabled={analyzing}>Load older analyses</button>}
+      <div className="sidebar-account"><div className="account-avatar" aria-hidden="true">{user?.email?.slice(0, 1).toUpperCase()}</div><div className="account-info"><span title={user?.email}>{user?.email}</span><small>Beta workspace</small></div><button type="button" onClick={onLogout} className="account-signout" aria-label="Sign out" title="Sign out">↪</button></div>
+      </div>
+    </aside>
+    <main id="workspace-content" className="explorer-main">
+      <header className="explorer-topbar"><div className="explorer-project"><div className="workspace-breadcrumb">Workspace {analysisData && <><span>/</span> Analysis</>}</div><div className="project-name">{analysisData?.projectName || 'Your projects'}</div></div><div className="workspace-actions">{analysisData && <button className="btn btn-ghost" onClick={() => downloadAnalysis(analysisData)}>Download report</button>}<span className="beta-chip">Beta</span></div></header>
+      <div className="explorer-content">
+        {error && <div className="sidebar-error workspace-error" role="alert">{error}</div>}
+        {(!analysisData || showImport) && !analyzing && <div className={!analysisData ? 'workspace-start' : 'workspace-import-inline'}>{!analysisData && <div className="workspace-welcome"><p className="eyebrow">START EXPLORING</p><h1>Understand your codebase.</h1><p>Import a project to explore its source, see how files connect, and find your starting point.</p></div>}<ImportProject analyzing={analyzing} aiEnabled={aiEnabled} onAnalyzeGithub={start(onAnalyzeGithub)} onAnalyzeZip={start(onAnalyzeZip)} onClose={analysisData ? () => setShowImport(false) : undefined} />{!analysisData && <div className="workspace-feature-notes"><span>Source explorer</span><span>Dependency graph</span><span>Saved analyses</span></div>}</div>}
+        {analyzing && <section className="workspace-progress" aria-label="Analysis progress"><AnalysisProgress repoUrl={analysisJob?.name || 'Loading project…'} progress={analysisJob?.progress} status={analysisJob?.status} startedAt={analysisStartedAt} />{analysisJob && <button className="btn btn-ghost" type="button" onClick={onCancel}>Cancel analysis</button>}{analysisData && <p className="muted-note">Your previous analysis is available below while this project is processed.</p>}</section>}
+        {analysisData && <>
+          <nav className="explorer-tabs" aria-label="Analysis views">{TABS.map(tab => <button key={tab.id} className={`tab ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)} type="button" aria-current={activeTab === tab.id ? 'page' : undefined}>{tab.label}</button>)}</nav>
+          <div className="analysis-metadata">{analysisData.coverage && <p className="coverage-summary">Analyzed {analysisData.coverage.analyzedFiles} of {analysisData.coverage.totalFiles} files <span>· {analysisData.coverage.skippedFiles} excluded or over limits</span></p>}{analysisData.cached && <span className="cache-badge">Cached</span>}{(analysisData.revision || analysisData.redactedValues > 0) && <details className="analysis-details"><summary>Import details</summary>{analysisData.revision && <p>Revision <code>{analysisData.revision.slice(0, 12)}</code></p>}<p>Function and class counts may be estimates for unsupported languages.</p>{analysisData.redactedValues > 0 && <p>{analysisData.redactedValues} possible credential(s) redacted from imported source.</p>}</details>}</div>
+          {analysisData.demoMode && <div className="analysis-stale-banner">Demo mode: explanations are sample responses, not AI analysis of this project.</div>}
+          {analysisData.aiUnavailable && aiEnabled && <div className="analysis-stale-banner">AI is now available for this project. <button className="btn btn-ghost" disabled={analyzing} onClick={onRetryTutorials}>Generate tutorials</button></div>}
+          {analysisData.analysisWarning && <div className="sidebar-error" role="status">Some tutorials could not be completed. Source exploration and completed chapters are available. <button className="btn btn-ghost" disabled={analyzing || !aiEnabled} onClick={onRetryTutorials}>Retry missing tutorials</button></div>}
+          <ErrorBoundary key={`${analysisData.jobId}:${activeTab}`}><Suspense fallback={<div className="view-loading" role="status">Loading view…</div>}>
+            {activeTab === 'overview' && <OverviewTab data={analysisData} />}
+            {activeTab === 'structure' && <StructureTab data={analysisData} onOpenSource={openSource} />}
+            {activeTab === 'graph' && <GraphTab data={analysisData} onOpenSource={openSource} />}
+            {activeTab === 'qa' && <QATab key={analysisData.jobId} data={analysisData} aiEnabled={aiEnabled} onOpenSource={openSource} />}
+            {activeTab === 'tutorials' && <TutorialsTab key={analysisData.jobId} data={analysisData} onOpenSource={openSource} />}
           </Suspense></ErrorBoundary>
-          {!analyzing && !analysisData && (
-            <div className="workspace-welcome">
-              <p className="eyebrow">A GOOD PLACE TO BEGIN</p>
-              <h1>Make yourself at home<br />in any codebase.</h1>
-              <p>Bring a project into your workspace. We’ll help you see the structure, follow the connections, and find your next step.</p>
-              <div className="workspace-steps">
-                <article><span>01 / IMPORT</span><h2>Choose your starting point</h2><p>Use the source panel to paste a public GitHub URL or choose a ZIP, then select Analyze Project.</p></article>
-                <article><span>02 / EXPLORE</span><h2>Follow the connections</h2><p>Move between the overview, source tree, and dependency graph. Open a file to look closer.</p></article>
-                <article><span>03 / UNDERSTAND</span><h2>Keep your context</h2><p>Return to saved analyses, export a report, or explore tutorials and Q&A when AI is available.</p></article>
-              </div>
-              <p className="workspace-hint">Beta tip: start with public or non-sensitive code you have permission to share.</p>
-            </div>
-          )}
-        </div>
-      </main>
-      {source && source.jobId === analysisData?.jobId && <SourceViewer key={`${source.jobId}:${source.path}:${source.startLine}`} jobId={source.jobId} source={source} onClose={() => setSource(null)} />}
-    </div>
-  )
+        </>}
+      </div>
+    </main>
+    {source && source.jobId === analysisData?.jobId && <SourceViewer key={`${source.jobId}:${source.path}:${source.startLine}`} jobId={source.jobId} source={source} onClose={() => setSource(null)} />}
+  </div>
 }

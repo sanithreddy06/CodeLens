@@ -22,11 +22,11 @@ export default function OverviewTab({ data }) {
       )}
 
       <div className="stats-row">
-        <div className="stat-badge"><span>📄</span> <span className="num">{m?.files ?? data.fileCount}</span> files</div>
-        <div className="stat-badge"><span>ƒ</span> <span className="num">{m?.functions ?? 0}</span> functions</div>
-        <div className="stat-badge"><span>⬚</span> <span className="num">{m?.classes ?? 0}</span> classes</div>
-        <div className="stat-badge"><span>🔗</span> <span className="num">{m?.edges ?? 0}</span> edges</div>
-        <div className="stat-badge"><span>📦</span> <span className="num">{m?.extDeps ?? 0}</span> ext deps</div>
+        <div className="stat-badge"><span className="num">{m?.files ?? data.fileCount}</span> files</div>
+        <div className="stat-badge"><span className="num">{m?.functions ?? 0}</span> functions</div>
+        <div className="stat-badge"><span className="num">{m?.classes ?? 0}</span> classes</div>
+        <div className="stat-badge"><span className="num">{m?.edges ?? 0}</span> edges</div>
+        <div className="stat-badge"><span className="num">{m?.extDeps ?? 0}</span> external dependencies</div>
       </div>
 
       <div className="card summary-card">

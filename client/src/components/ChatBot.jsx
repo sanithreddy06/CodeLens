@@ -69,7 +69,7 @@ export default function ChatBot({ jobId, projectName, variant = 'floating', onOp
   const panel = (
     <div className={`chat-panel glass ${variant === 'embedded' ? 'chat-panel-embedded' : ''}`}>
           <div className="chat-header">
-            <h3>🤖 AI Assistant — {projectName}</h3>
+            <h3>Project Q&A — {projectName}</h3>
             {variant !== 'embedded' && (
               <button className="chat-close" onClick={() => setOpen(false)}>×</button>
             )}
