@@ -19,7 +19,8 @@
     "test:browser": "playwright test",
     "db:backup": "node server/scripts/backup.js",
     "test:production": "node server/e2e/production.js",
-    "test:browser:keyless": "playwright test --config playwright.keyless.config.js"
+    "test:browser:keyless": "playwright test --config playwright.keyless.config.js",
+    "test:responsive": "playwright test --config playwright.responsive.config.js"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

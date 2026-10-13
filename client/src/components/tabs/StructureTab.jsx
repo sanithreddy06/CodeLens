@@ -25,7 +25,7 @@ function FolderNode({ node, level = 0, onOpenSource }) {
   const files = (node.files || []).sort((a, b) => a.path.localeCompare(b.path))
 
   return (
-    <div className="tree-node" style={{ marginLeft: level * 10 }}>
+    <div className="tree-node" style={{ marginLeft: level > 0 ? 10 : 0 }}>
       {node.name && (
         <button className="tree-folder" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
           <span className="caret">{open ? '▾' : '▸'}</span>
@@ -80,7 +80,7 @@ export default function StructureTab({ data, onOpenSource }) {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
-        <div style={{ marginTop: '12px' }}>
+        <div className="source-tree" style={{ marginTop: '12px' }}>
           <FolderNode node={tree} onOpenSource={onOpenSource} />
         </div>
       </div>

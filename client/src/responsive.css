@@ -1,0 +1,89 @@
+/* Content adapts to available space; dense source and tables scroll locally. */
+html { -webkit-text-size-adjust: 100%; }
+.explorer { max-width: 1920px; margin-inline: auto; }
+.explorer-main { container-type: inline-size; }
+.explorer-project, .workspace-actions, .settings-section, .theme-option,
+.tutorials-main, .chat-messages, .chat-msg, .source-header>div { min-width: 0; }
+.explorer-sidebar { overflow-y: auto; }
+.sidebar-navigation { flex-shrink: 0; }
+.history-list { flex-shrink: 1; }
+.workspace-feature-notes, .hero-actions, .source-switch, .chat-header { flex-wrap: wrap; }
+.explorer-tabs { flex-wrap: wrap; }
+.explorer-tabs .tab { min-height: 44px; }
+.abstractions-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.card, .chapter-content, .chat-msg, .settings-reset, .signin-help { overflow-wrap: anywhere; }
+.chapter-content pre, .chapter-content table { max-width: 100%; overflow-x: auto; }
+.chapter-content table { display: block; }
+.source-tree { overflow-x: auto; }
+.tree-folder { flex-wrap: wrap; max-width: 100%; }
+.folder-name, .file-chip { overflow-wrap: anywhere; white-space: normal; }
+.file-chip { max-width: 100%; text-align: left; }
+.source-dialog { max-height: 90dvh; max-width: calc(100vw - 24px); }
+.source-header button { flex-shrink: 0; }
+.source-search input, .graph-search input { min-width: min(160px, 100%); }
+.graph-canvas { height: clamp(260px, 55dvh, 640px); overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
+.chat-panel-embedded { height: clamp(320px, 70dvh, 800px); max-width: 100%; }
+.chat-messages { min-height: 0; }
+.chat-header, .chat-input-area { flex-shrink: 0; }
+.settings-section .login-input { width: 100%; max-width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.account-actions .btn { white-space: normal; }
+.legal-page header { flex-wrap: wrap; }
+@container (max-width: 800px) {
+  .tutorials-split { flex-direction: column; }
+  .tutorials-sidebar { position: static; width: 100%; min-width: 0; height: auto; }
+  .tutorials-list { height: auto; max-height: 240px; }
+  .stats-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat-badge { min-width: 0; border-bottom: 1px solid var(--line); }
+}
+@media (min-width: 1600px) {
+  .explorer-sidebar { width: 280px; min-width: 280px; }
+  .explorer-main { padding-inline: clamp(36px, 3vw, 64px); }
+  .workspace-start { max-width: 760px; margin-top: clamp(48px, 6vh, 90px); }
+  .settings-page { max-width: 900px; }
+}
+@media (max-width: 900px) {
+  .explorer-sidebar { overflow: visible; }
+  .explorer-main { padding-inline: clamp(14px, 3vw, 24px); }
+  .explorer-sidebar { grid-template-columns: minmax(0, 1fr) auto; }
+  .sidebar-navigation { min-width: 0; }
+  .mobile-project-toggle, .new-analysis-button, .settings-nav, .account-signout { min-height: 44px; }
+  .history-delete { min-width: 44px; }
+}
+@media (max-width: 650px) {
+  .site-header { flex-wrap: wrap; gap: 12px; }
+  .site-header nav { flex-wrap: wrap; }
+  .site-header nav>a:nth-child(2) { display: inline-flex; }
+  .site-header nav a, .legal-links a { min-height: 44px; display: inline-flex; align-items: center; }
+  .signin-main { padding-inline: 16px; margin-top: 16px; }
+  .signin-card { padding: clamp(18px, 5vw, 28px); }
+  .signin-card .login-input, .import-field input.sidebar-input, .settings-section .login-input,
+  .setting-row select, .history-search input, .source-search input, .graph-search input,
+  .sidebar-input, .chat-input { font-size: 16px; min-height: 44px; }
+  .signin-card .login-continue-btn, .btn, .source-switch label, .theme-option { min-height: 44px; }
+  .signin-card label, .signin-intro, .signin-help, .import-heading p, .import-field>p,
+  .import-capability, .import-footer>p, .settings-section>p, .setting-row label>span,
+  .settings-footer>p, .settings-reset p { font-size: 13px; }
+  .workspace-feature-notes { font-size: 12px; gap: 8px 18px; }
+  .theme-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .theme-option { padding: 5px; }
+  .theme-caption { padding-inline: 0; flex-wrap: wrap; gap: 3px; }
+  .setting-row:has(select) { flex-wrap: wrap; gap: 10px; }
+  .setting-row select { width: 100%; max-width: 100%; }
+  .account-actions { gap: 10px; }
+  .account-actions .btn { flex: 1 1 180px; margin: 0; }
+  .settings-reset { padding: 14px; }
+  .source-header { align-items: flex-start; }
+  .source-header h3 { font-size: 13px; }
+  .source-search { gap: 8px; }
+  .source-search input { flex-basis: 100%; }
+  .chat-msg { max-width: 100%; }
+  .legal-page main { padding: 28px 20px 56px; }
+  .legal-page header { padding: 20px; }
+  .explorer-tabs { gap: 4px 18px; }
+}
+@media (max-width: 360px) {
+  .explorer-sidebar { padding-inline: 14px; gap: 10px; }
+  .new-analysis-button { padding-inline: 8px; }
+  .settings-section, .import-panel, .card { padding: 14px; }
+  .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

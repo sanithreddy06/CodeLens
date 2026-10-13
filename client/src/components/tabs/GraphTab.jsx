@@ -7,10 +7,14 @@ export default function GraphTab({ data, onOpenSource }) {
   const [filter, setFilter] = useState('')
   const [focus, setFocus] = useState('')
   const [width, setWidth] = useState(600)
+  const [height, setHeight] = useState(480)
   const container = useRef(null)
   useEffect(() => {
     if (!container.current) return
-    const observer = new ResizeObserver(entries => setWidth(Math.max(200, Math.floor(entries[0].contentRect.width))))
+    const observer = new ResizeObserver(([entry]) => {
+      setWidth(Math.max(1, Math.floor(entry.contentRect.width)))
+      setHeight(Math.max(1, Math.floor(entry.contentRect.height)))
+    })
     observer.observe(container.current)
     return () => observer.disconnect()
   }, [])
@@ -48,8 +52,8 @@ export default function GraphTab({ data, onOpenSource }) {
     <p role="status">Showing {graph.nodes.length} of {graph.total} nodes · {graph.total - graph.nodes.length} hidden by filters or limit{focus && ` · ${incoming} incoming / ${outgoing} outgoing imports`}</p>
     {data.metrics?.unparsedFiles > 0 && <p>{data.metrics.unparsedFiles} file(s) could not be parsed. Their imports may be missing.</p>}
     {data.metrics?.unresolvedImports > 0 && <p>{data.metrics.unresolvedImports} local import(s) could not be resolved within the included files.</p>}
-    <div ref={container} style={{ height: 480, overflow: 'hidden', border: '1px solid var(--border)', borderRadius: 12 }}>
-      <ForceGraph2D width={width} height={480} graphData={graph}
+    <div ref={container} className="graph-canvas">
+      <ForceGraph2D width={width} height={height} graphData={graph}
         nodeLabel={node => String(node.label).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}
         nodeColor={node => node.type === 'file' ? '#667cc3' : node.type === 'builtin' ? '#4e9b84' : '#c29b5a'}
         linkColor={() => '#bac4d8'}

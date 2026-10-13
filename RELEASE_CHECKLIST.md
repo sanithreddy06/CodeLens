@@ -55,3 +55,9 @@ Added Privacy, Terms, and Security pages with the supplied operator/contact deta
 These changes do not check off deployment, verified-email signup, independent security review, legal review, data-processor contracts, backups, monitoring, or capacity validation. See LAUNCH_REQUIREMENTS.md for the remaining operational work.
 
 Local evidence: 43 backend tests, 38 API integration checks, 20 desktop/mobile browser checks, 2 AI-disabled browser checks, frontend lint/build, and the production smoke passed. Final server and client production dependency audits reported zero known vulnerabilities at implementation time. Public deployment and third-party review were not performed.
+
+### Responsive layout verification — 2026-10-14
+
+Added fluid workspace widths, narrow-layout settings and tutorials, larger mobile form controls, wrapping navigation/actions, viewport-sized graphs and chat panels, and local scrolling for dense source content. The public navigation retains the FAQ link on mobile. Source-tree indentation grows one step per level rather than cumulatively.
+
+`npm run test:responsive` checks the public pages, signup/recovery, policies, import, Settings, deletion confirmation, all five analysis views, and source dialogs at 320×568, 390×844, 768×1024, 1024×768, 1280×480, 1440×900, 2560×1440, and 844×390. It verifies page width, graph sizing, mobile input text size, and source dialog bounds; desktop/mobile screenshots were reviewed. This suite now runs in CI alongside the existing browser checks.
