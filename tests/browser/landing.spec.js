@@ -68,3 +68,22 @@ test('signup failure stays on the create-account form', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
   await expect(page).toHaveURL(/#signup$/);
 });
+
+test('forgot password opens recovery and explains unavailable delivery', async ({ page }) => {
+  await page.goto('/#signin');
+  await page.getByRole('link', { name: 'Forgot password?' }).click();
+  await expect(page.getByRole('heading', { name: 'Forgot your password?' })).toBeVisible();
+  await page.getByLabel('Email address').fill('browser@example.com');
+  await page.getByRole('button', { name: 'Send reset link' }).click();
+  await expect(page.getByRole('alert')).toContainText('Password reset emails are not available yet.');
+  await page.getByRole('link', { name: 'Back to sign in' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
+  await page.goto('/#reset-password?token=invalid');
+  await page.getByLabel('New password', { exact: true }).fill('new-test-password');
+  await page.getByLabel('Confirm password').fill('different-password');
+  await page.getByRole('button', { name: 'Update password' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Passwords must match.');
+  await page.getByLabel('Confirm password').fill('new-test-password');
+  await page.getByRole('button', { name: 'Update password' }).click();
+  await expect(page.getByRole('alert')).toContainText('invalid or expired');
+});

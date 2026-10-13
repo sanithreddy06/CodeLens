@@ -19,7 +19,7 @@ Settings include light, dark, and system themes, source text size and wrapping, 
 
 The website includes a responsive public landing page, interactive product illustration, dedicated sign-in experience, and a focused analysis workspace. Importing sits in the main panel; project history and account controls stay in the sidebar, with expandable navigation on mobile. Illustrations are labelled examples; they do not represent live AI results.
 
-**Account access:** create an account from the sign-in page using a complete email address and a 12–256 character password. Signup validates address format; inbox ownership verification is not implemented. MEMBER_EMAILS restrictions still apply. Password recovery, billing, and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
+**Account access:** create an account from the sign-in page using a complete email address and a 12–256 character password. Signup validates address format; inbox ownership verification is not implemented. MEMBER_EMAILS restrictions still apply. Password recovery requires email configuration (see below). Billing and private GitHub integration are not available yet. Follow [the release checklist](RELEASE_CHECKLIST.md) before a public launch.
 
 ![CodeLens workspace](docs/images/workspace.png)
 
@@ -203,3 +203,9 @@ For a full restore point including pending work, stop the service and copy the u
 - Credential redaction is conservative and can miss secrets or redact nonsecret examples.
 - Citation validation checks IDs, not whether a model's statement is actually entailed by the cited code.
 - ZIPs and source use local storage. There is no multi-instance queue, GitHub OAuth/private-repository access, commit comparison, or billing system.
+
+### Password recovery
+
+The sign-in page includes **Forgot password?**. Configure `RESEND_API_KEY`, `EMAIL_FROM` (a verified sender), and `PUBLIC_APP_URL` in `server/.env`, then restart the server to enable email delivery through [Resend](https://resend.com/docs/api-reference/emails/send-email). Without these settings, the form explains that email recovery is unavailable. No reset links are exposed through API responses or logs.
+
+Reset links expire after 15 minutes, are single-use, and are stored as hashes. Resetting a password revokes existing sessions. Requests are rate limited and return the same confirmation for existing and unknown accounts. Delivery failures are logged without email addresses or tokens; monitor these logs when operating the service.

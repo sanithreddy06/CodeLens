@@ -12,7 +12,7 @@ export async function apiRequest(path, { method = 'GET', body, signal, timeout =
   })
   const json = await res.json().catch(() => null)
   if (!res.ok) {
-    if (res.status === 401 && !['/auth/login', '/auth/signup', '/auth/me'].includes(path)) window.dispatchEvent(new Event('codelens:session-expired'))
+    if (res.status === 401 && !['/auth/login', '/auth/signup', '/auth/forgot-password', '/auth/reset-password', '/auth/me'].includes(path)) window.dispatchEvent(new Event('codelens:session-expired'))
     const error = new Error(json?.error || `Request failed (${res.status})`)
     error.status = res.status
     throw error

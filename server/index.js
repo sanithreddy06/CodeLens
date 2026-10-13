@@ -41,6 +41,9 @@ app.use('/api', (req, res, next) => {
 const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const loginIpLimit = rateLimit({ limit: 30, windowMs: 15 * 60000, key: req => req.ip });
 const loginAccountLimit = rateLimit({ limit: 10, windowMs: 15 * 60000, key: req => auth.normalizeEmail(req.body?.email) });
+const passwordReset = require('./services/passwordReset');
+app.post('/api/auth/forgot-password', rateLimit({ limit: 5, windowMs: 15 * 60000, key: req => req.ip }), rateLimit({ limit: 3, windowMs: 15 * 60000, key: req => auth.normalizeEmail(req.body?.email) }), asyncRoute(passwordReset.forgot));
+app.post('/api/auth/reset-password', rateLimit({ limit: 10, windowMs: 15 * 60000, key: req => req.ip }), asyncRoute(passwordReset.reset));
 app.post('/api/auth/signup', rateLimit({ limit: 5, windowMs: 15 * 60000, key: req => req.ip }), asyncRoute(auth.signup));
 app.post('/api/auth/login', loginIpLimit, loginAccountLimit, asyncRoute(auth.login));
 app.get('/api/auth/me', auth.required, auth.me);

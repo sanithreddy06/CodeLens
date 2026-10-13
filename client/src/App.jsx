@@ -5,6 +5,7 @@ import './settings.css'
 import usePreferences from './hooks/usePreferences'
 import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
+import PasswordRecovery from './components/PasswordRecovery'
 import ExplorerLayout from './components/ExplorerLayout'
 import { apiRequest, clearSession } from './config/api'
 
@@ -155,6 +156,7 @@ function App() {
     } catch (err) { setError(err.message) }
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
+  if (page === '#forgot-password' || page.startsWith('#reset-password')) return <PasswordRecovery key={page} page={page} />
   if (!user) return ['#signin', '#signup', '#settings'].includes(page) ? <LoginPage key={page} signup={page === '#signup'} onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
   return <ExplorerLayout {...preferenceState} showingSettings={page === '#settings'} onSettings={() => { window.location.hash = 'settings'; window.scrollTo(0, 0) }} onWorkspace={() => { window.location.hash = 'workspace'; window.scrollTo(0, 0) }} user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
     analysisJob={analysisJob} analysisStartedAt={analysisJob?.createdAt} onAnalyzeGithub={analyzeGithub}
