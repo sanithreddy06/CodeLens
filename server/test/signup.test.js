@@ -13,7 +13,8 @@ test('signup validates addresses and never overwrites an existing password', asy
   try {
     for (const email of ['a@gmail.com', 'student+code@university.edu', 'first.last@example.co.uk']) assert.equal(auth.validEmail(email), true);
     for (const email of ['a@gmail', 'a@@gmail.com', '.a@gmail.com', 'a..b@gmail.com', 'a@-gmail.com', 'a@g_mail.com', 'a@gmail.com.', 'a @gmail.com']) assert.equal(auth.validEmail(email), false);
-    const request = { headers: {}, body: { email: ' New@Gmail.com ', password: 'a-secure-password' } };
+    const request = { headers: {}, body: { termsVersion: '2026-10-14', ageConfirmed: true, email: ' New@Gmail.com ', password: 'a-secure-password' } };
+    const missingPolicy = response(); await auth.signup({ ...request, body: { ...request.body, termsVersion: undefined } }, missingPolicy); assert.equal(missingPolicy.code, 400);
     const first = response(); await auth.signup(request, first); assert.equal(first.code, 201); assert.equal(first.body.user.email, 'new@gmail.com'); assert.ok(first.body.csrfToken);
     const duplicate = response(); await auth.signup({ ...request, body: { ...request.body, password: 'different-password' } }, duplicate); assert.equal(duplicate.code, 409);
     assert.equal(await verifyPassword('a-secure-password', store.getUser('new@gmail.com').password_hash), true);

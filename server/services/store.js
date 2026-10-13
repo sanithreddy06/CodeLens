@@ -10,8 +10,10 @@ function getDb() {
   if (db) return db;
   if (DB_PATH !== ':memory:') fs.mkdirSync(path.dirname(DB_PATH), { recursive: true, mode: 0o700 });
   db = new DatabaseSync(DB_PATH);
-  db.exec(`PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;
+  if (DB_PATH !== ':memory:') fs.chmodSync(DB_PATH, 0o600);
+  db.exec(`PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000; PRAGMA secure_delete = ON;
     CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, created_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS policy_acceptances (email TEXT PRIMARY KEY, version TEXT NOT NULL, accepted_at INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_json TEXT NOT NULL, expires_at INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS analyses (
       key TEXT PRIMARY KEY, project_name TEXT NOT NULL, source_type TEXT NOT NULL,
@@ -51,7 +53,10 @@ function getSession(token) {
   return row ? { user: JSON.parse(row.user_json), expiresAt: row.expires_at } : null;
 }
 function deleteSession(token) { getDb().prepare('DELETE FROM sessions WHERE token = ?').run(digest(token)); }
-function sweepExpiredSessions() { getDb().prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now()); }
+function sweepExpiredSessions() {
+  getDb().prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now());
+  if (getDb().prepare("SELECT 1 FROM sqlite_master WHERE name = 'password_resets'").get()) getDb().prepare('DELETE FROM password_resets WHERE expires_at <= ?').run(Date.now());
+}
 function countSessions() { return Number(getDb().prepare('SELECT COUNT(*) AS n FROM sessions').get().n); }
 function analysisFromRow(row) {
   return row ? {

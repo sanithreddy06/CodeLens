@@ -5,6 +5,7 @@ import './settings.css'
 import usePreferences from './hooks/usePreferences'
 import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
+import LegalPage from './components/LegalPage'
 import PasswordRecovery from './components/PasswordRecovery'
 import ExplorerLayout from './components/ExplorerLayout'
 import { apiRequest, clearSession } from './config/api'
@@ -88,7 +89,7 @@ function App() {
     if (loggingIn) return
     setLoggingIn(true); setError(null)
     try {
-      const json = await apiRequest(signup ? '/auth/signup' : '/auth/login', { method: 'POST', body: { email, password } })
+      const json = await apiRequest(signup ? '/auth/signup' : '/auth/login', { method: 'POST', body: { email, password, ...(signup ? { termsVersion: '2026-10-14', ageConfirmed: true } : {}) } })
       setUser(json.user)
       setAiEnabled(Boolean(json.ai?.enabled))
       await refreshHistory()
@@ -156,6 +157,7 @@ function App() {
     } catch (err) { setError(err.message) }
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
+  if (['#privacy', '#terms', '#security'].includes(page)) return <LegalPage type={page.slice(1)} />
   if (page === '#forgot-password' || page.startsWith('#reset-password')) return <PasswordRecovery key={page} page={page} />
   if (!user) return ['#signin', '#signup', '#settings'].includes(page) ? <LoginPage key={page} signup={page === '#signup'} onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
   return <ExplorerLayout {...preferenceState} showingSettings={page === '#settings'} onSettings={() => { window.location.hash = 'settings'; window.scrollTo(0, 0) }} onWorkspace={() => { window.location.hash = 'workspace'; window.scrollTo(0, 0) }} user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}

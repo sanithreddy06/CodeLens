@@ -42,7 +42,7 @@ async function callGemini(prompt, apiKey, options = {}) {
     } catch (error) {
       operation.check();
       if (error.status === 429) throw error;
-      console.error(`  [LLM] ${modelName} error: ${error.message}`);
+      console.error('  [LLM] Provider request failed', { name: error.name, status: error.status });
       console.warn(`  [LLM] Trying next model...`);
       continue;
     }
@@ -257,7 +257,7 @@ async function callLLM(prompt, options = {}) {
       const isPayloadTooLarge = isPayloadError(msg);
       const delay = isRateLimit ? 15000 * attempt : 3000 * attempt;
 
-      console.error(`  [LLM] Attempt ${attempt}/${retries} failed: ${msg.substring(0, 150)}`);
+      console.error(`  [LLM] Attempt ${attempt}/${retries} failed`, { name: error.name, status: error.status });
       if (isPayloadTooLarge) {
         throw new Error(
           "Prompt exceeded provider token budget (HTTP 413). " +

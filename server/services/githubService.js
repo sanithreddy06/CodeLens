@@ -185,7 +185,7 @@ async function fetchFileContents(owner, repo, branch, entries, token = null, onP
         return { path: entry.path, sha: entry.sha, content };
       } catch (err) {
         operation.check();
-        console.warn(`Failed to fetch ${entry.path}: ${err.message}`);
+        console.warn('GitHub source fetch failed', { name: err.name, status: err.status });
         return null;
       }
     });

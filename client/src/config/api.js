@@ -1,7 +1,7 @@
 export const API = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
 let csrfToken = ''
 export function clearSession() { csrfToken = '' }
-export async function apiRequest(path, { method = 'GET', body, signal, timeout = 30000 } = {}) {
+export async function apiRequest(path, { method = 'GET', body, signal, timeout = 30000, download = false } = {}) {
   const headers = { 'X-CodeLens-Request': '1' }
   if (csrfToken) headers['X-CSRF-Token'] = csrfToken
   if (body && !(body instanceof FormData)) headers['Content-Type'] = 'application/json'
@@ -10,6 +10,7 @@ export async function apiRequest(path, { method = 'GET', body, signal, timeout =
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(timeout)]) : AbortSignal.timeout(timeout),
   })
+  if (res.ok && download) return res.blob()
   const json = await res.json().catch(() => null)
   if (!res.ok) {
     if (res.status === 401 && !['/auth/login', '/auth/signup', '/auth/forgot-password', '/auth/reset-password', '/auth/me'].includes(path)) window.dispatchEvent(new Event('codelens:session-expired'))

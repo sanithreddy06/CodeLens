@@ -49,7 +49,7 @@ async function login(req, res) {
   if (!validEmail(email) || typeof password !== 'string' || !password || password.length > 256) return res.status(400).json({ error: 'Enter a valid email and password (up to 256 characters).' });
   const user = store.getUser(email);
   const valid = await verifyPassword(password, user?.password_hash || dummyHash);
-  if (!user || !valid) return res.status(401).json({ error: 'Invalid email or password.' });
+  if (!user || !valid || store.getUser(email)?.password_hash !== user.password_hash) return res.status(401).json({ error: 'Invalid email or password.' });
   if (!allowedMember(email)) return res.status(403).json({ error: 'This account does not have access.' });
   return startSession(req, res, email);
 }
@@ -64,16 +64,26 @@ function startSession(req, res, email) {
 }
 let registrations = 0;
 async function signup(req, res) {
+  if (process.env.ALLOW_SIGNUP === 'false') return res.status(403).json({ error: 'New account registration is currently closed.' });
   const email = normalizeEmail(req.body?.email);
   const password = req.body?.password;
   if (!validEmail(email)) return res.status(400).json({ error: 'Enter a complete email address, such as you@gmail.com.' });
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) return res.status(400).json({ error: 'Use a password with 12–256 characters.' });
   if (!allowedMember(email)) return res.status(403).json({ error: 'Account creation is restricted for this workspace.' });
+  if (req.body?.termsVersion !== '2026-10-14' || req.body?.ageConfirmed !== true) return res.status(400).json({ error: 'Review the Terms and Privacy Policy and confirm you are at least 18.' });
   if (registrations >= 2) return res.status(429).json({ error: 'Account creation is busy. Please try again shortly.' });
   registrations++;
   try {
     const hash = await hashPassword(password);
-    if (!store.createUser(email, hash)) return res.status(409).json({ error: 'Unable to create this account. If you already have an account, sign in.' });
+    const db = store.getDb();
+    let created;
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      created = store.createUser(email, hash);
+      if (created) db.prepare('INSERT INTO policy_acceptances VALUES (?, ?, ?)').run(email, '2026-10-14', Date.now());
+      db.exec('COMMIT');
+    } catch (error) { db.exec('ROLLBACK'); throw error; }
+    if (!created) return res.status(409).json({ error: 'Unable to create this account. If you already have an account, sign in.' });
     res.status(201);
     return startSession(req, res, email);
   } finally { registrations--; }

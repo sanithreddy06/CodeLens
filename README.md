@@ -209,3 +209,7 @@ For a full restore point including pending work, stop the service and copy the u
 The sign-in page includes **Forgot password?**. Configure `RESEND_API_KEY`, `EMAIL_FROM` (a verified sender), and `PUBLIC_APP_URL` in `server/.env`, then restart the server to enable email delivery through [Resend](https://resend.com/docs/api-reference/emails/send-email). Without these settings, the form explains that email recovery is unavailable. No reset links are exposed through API responses or logs.
 
 Reset links expire after 15 minutes, are single-use, and are stored as hashes. Resetting a password revokes existing sessions. Requests are rate limited and return the same confirmation for existing and unknown accounts. Delivery failures are logged without email addresses or tokens; monitor these logs when operating the service.
+
+### Privacy and security
+
+Public Privacy, Terms, and Security pages use the operator details supplied for CodeLens in India. New public signups must accept policy version `2026-10-14` and confirm they are at least 18. Settings provides password-confirmed data export, account deletion, and sign-out of other sessions. See [SECURITY.md](SECURITY.md) for implementation and operations, and [LAUNCH_REQUIREMENTS.md](LAUNCH_REQUIREMENTS.md) for work needed before public release.

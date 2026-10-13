@@ -107,3 +107,11 @@ npm run test:browser:keyless
 The production smoke test runs with `NODE_ENV=production`, no provider keys, no fake AI, and a temporary database. It verifies static assets, readiness, secure cookie attributes, authenticated ZIP ingestion, source access, explicit AI gating, and restart persistence. CI also builds and smoke-tests the Docker image.
 
 Deployment files are prepared; no hosting account, domain, or live deployment has been created automatically.
+
+## Security and privacy configuration
+
+See [SECURITY.md](SECURITY.md) for hardening and incident procedures and [LAUNCH_REQUIREMENTS.md](LAUNCH_REQUIREMENTS.md) for remaining launch decisions. The public website now links to Privacy, Terms, and Security pages. Settings provides password-confirmed exports, account deletion, and revocation of other sessions.
+
+Remove `LOGIN_USERS` after bootstrapping accounts. Deletion is blocked for entries still configured there, because startup would otherwise recreate them. Deleting an account removes active records, not old backup files or copies retained by processors. Set up backup expiration and replay deletions after restoring a backup.
+
+`ALLOW_SIGNUP=false` closes new registration without disabling existing accounts. `PUBLIC_API_ORIGIN` is only needed when HTML served by this server calls a separately hosted API; use an exact trusted HTTP(S) origin. Separately hosted frontend HTML needs its own security headers. Verify actual browser workflows after changing CSP or hosting origins.

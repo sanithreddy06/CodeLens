@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LegalLinks } from './LegalPage'
 
 export function Brand({ light = false }) {
   return <a className={`product-brand${light ? ' brand-light' : ''}`} href="#" aria-label="CodeLens home"><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-14-2 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg></span>CodeLens</a>
@@ -26,6 +27,6 @@ export default function LandingPage() {
       <section className="workflow-section" aria-label="How it works"><div className="section-heading"><p className="eyebrow">A SIMPLE WORKFLOW</p><h2>From unfamiliar to understood.</h2></div><div className="workflow-grid">{[{ n: '01', title: 'Import your project', text: 'Paste a public GitHub URL or choose a ZIP archive.' }, { n: '02', title: 'Explore the connections', text: 'Browse source files and navigate import relationships.' }, { n: '03', title: 'Keep your context', text: 'Reopen saved analyses, export a report, or learn with AI when enabled.' }].map(step => <article key={step.n}><span className="step-number">{step.n}</span><h3>{step.title}</h3><p>{step.text}</p></article>)}</div></section>
       <section id="questions" className="faq-section"><div><p className="eyebrow">GOOD TO KNOW</p><h2>A few details.</h2></div><div className="faq-list">{questions.map(([question, answer]) => <details key={question}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></section>
     </main>
-    <footer className="site-footer"><Brand /><span>Codebase clarity for developers and students.</span><a href="https://github.com/sanithreddy06/CodeLens" target="_blank" rel="noreferrer">GitHub ↗</a><a href="#signin">Sign in</a></footer>
+    <footer className="site-footer"><Brand /><LegalLinks /><span>Codebase clarity for developers and students.</span><a href="https://github.com/sanithreddy06/CodeLens" target="_blank" rel="noreferrer">GitHub ↗</a><a href="#signin">Sign in</a></footer>
   </div>
 }

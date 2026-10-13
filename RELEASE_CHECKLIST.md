@@ -47,3 +47,11 @@ The public page, sign-in, and analysis workspace now share a minimal visual syst
 Verified locally: frontend lint and production build, 40 backend tests, 12 desktop/mobile browser workflow checks, 2 browser checks without AI configuration, and the production smoke. The prior unfinished browser checks are resolved. Browser tests use temporary data and fake AI; real-provider quality and the public-launch checklist remain separate work.
 
 Settings verification includes saved preferences after reload, live system-theme changes, light/dark public and sign-in pages, source text size and wrapping, default import choice, preference reset without deleting projects, and history filtering.
+
+### Security and policy baseline — 2026-10-14
+
+Added Privacy, Terms, and Security pages with the supplied operator/contact details; new-signup policy acceptance; account export/deletion and session revocation with password confirmation; CSP and browser permissions headers; global request/password-operation limits; HTTP timeout bounds; and provider-log redaction. Password recovery is implemented but requires configured email delivery. Production dependencies were reviewed and updated.
+
+These changes do not check off deployment, verified-email signup, independent security review, legal review, data-processor contracts, backups, monitoring, or capacity validation. See LAUNCH_REQUIREMENTS.md for the remaining operational work.
+
+Local evidence: 43 backend tests, 38 API integration checks, 20 desktop/mobile browser checks, 2 AI-disabled browser checks, frontend lint/build, and the production smoke passed. Final server and client production dependency audits reported zero known vulnerabilities at implementation time. Public deployment and third-party review were not performed.

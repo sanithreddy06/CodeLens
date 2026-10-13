@@ -16,6 +16,8 @@ const { rateLimit } = require('./services/rateLimit');
 const { chatWithCodebase } = require('./services/aiService');
 const { retrieveSources, sourceContext, validateCitations } = require('./services/retrieval');
 const { parseRepoUrl } = require('./services/githubService');
+const { securityHeaders, passwordCapacity } = require('./services/security');
+const account = require('./services/account');
 const app = express();
 app.disable('x-powered-by');
 if (process.env.TRUST_PROXY_HOPS) app.set('trust proxy', config.integer('TRUST_PROXY_HOPS', 0, 0, 5));
@@ -32,6 +34,9 @@ app.use((req, res, next) => {
   if (!trustedOrigin(req, req.get('origin'))) return res.status(403).json({ error: 'Origin is not allowed.' });
   next();
 });
+app.use(securityHeaders);
+app.use('/api', rateLimit({ limit: 600, windowMs: 60000, key: req => req.ip }));
+app.use('/api/auth', passwordCapacity);
 app.use(cors({ origin: (origin, cb) => cb(null, origin || false), credentials: true }));
 app.use(express.json({ limit: '32kb' }));
 app.use('/api', (req, res, next) => {
@@ -66,6 +71,7 @@ app.post('/api/analyze-zip', analysisLimit, (req, res, next) => {
     activeUploads--;
     if (error) return next(error);
     if (!req.file) return res.status(400).json({ error: 'A ZIP file is required.' });
+    if (!store.getUser(req.user.email)) return res.status(401).json({ error: 'Please sign in again.' });
     try { res.status(202).json({ success: true, jobId: jobs.createZipJob(req.file.buffer, req.user.email, req.file.originalname) }); }
     catch (err) { next(err); }
   });
@@ -107,6 +113,31 @@ app.delete('/api/jobs/:jobId', ownedJob, (req, res) => {
   res.json({ success: true });
 });
 const activeChats = new Set();
+const activeExports = new Set();
+const accountLimit = rateLimit({ limit: 5, windowMs: 15 * 60000 });
+const accountCheck = asyncRoute(account.reauthenticate);
+app.post('/api/account/sessions/revoke', accountLimit, passwordCapacity, accountCheck, (req, res) => {
+  account.revokeOtherSessions(req.user.email, req.sessionToken);
+  res.json({ success: true });
+});
+app.post('/api/account/export', accountLimit, passwordCapacity, accountCheck, asyncRoute(async (req, res) => {
+  if (activeExports.has(req.user.email) || activeExports.size >= 2) return res.status(429).json({ error: 'An export is already running. Please retry shortly.' });
+  activeExports.add(req.user.email);
+  try { await account.exportData(req, res); } finally { activeExports.delete(req.user.email); }
+}));
+app.post('/api/account/delete', accountLimit, passwordCapacity, accountCheck, (req, res) => {
+  if (String(process.env.LOGIN_USERS || '').split(',').some(entry => entry.slice(0, entry.indexOf(':')).trim().toLowerCase() === req.user.email)) return res.status(409).json({ error: 'Ask the administrator to remove this account from LOGIN_USERS before deleting it, so startup cannot recreate it.' });
+  if (req.body?.confirmation !== 'DELETE') return res.status(400).json({ error: 'Type DELETE to confirm account deletion.' });
+  if (activeExports.has(req.user.email) || activeChats.has(req.user.email) || store.pendingCount(req.user.email)) return res.status(409).json({ error: 'Wait for active analyses, answers, and exports to finish before deleting your account.' });
+  // Remove any remaining archive files before removing their database records.
+  for (const job of store.listJobs(req.user.email, -1)) {
+    try { fs.unlinkSync(jobs.uploadPath(job.id)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  }
+  account.remove(req.user.email);
+  res.clearCookie('codelens_session', { httpOnly: true, secure: config.production, sameSite: 'lax', path: '/api' });
+  res.json({ success: true });
+});
+
 app.post('/api/chat', rateLimit({ limit: 30, windowMs: 60000 }), (req, res, next) => {
   if (typeof req.body?.message !== 'string' || !req.body.message.trim() || req.body.message.length > 4000 || typeof req.body.jobId !== 'string') return res.status(400).json({ error: 'A question (up to 4000 characters) and analysis ID are required.' });
   next();
@@ -163,6 +194,10 @@ async function start() {
     console.log(ai.enabled ? `AI provider enabled: ${ai.provider}` : 'AI not configured: source exploration is available. Add a provider key and restart to enable AI.');
     jobs.start();
   });
+  server.requestTimeout = 120000;
+  server.headersTimeout = 15000;
+  server.keepAliveTimeout = 5000;
+  server.maxRequestsPerSocket = 1000;
   server.on('error', error => { console.error(error.message); process.exitCode = 1; });
   const cleanup = setInterval(store.sweepExpiredSessions, 10 * 60000);
   cleanup.unref();

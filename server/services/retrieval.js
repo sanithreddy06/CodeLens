@@ -67,4 +67,4 @@ function validateCitations(answer, sources) {
   const valid = new Set(sources.map(source => source.id));
   return String(answer).replace(/\[(S\d+)\]/g, (match, id) => valid.has(id) ? match : '[unverified source]');
 }
-module.exports = { retrieveSources, sourceContext, validateCitations, buildIndex };
+module.exports = { clearIndexes: () => indexes.clear(), retrieveSources, sourceContext, validateCitations, buildIndex };

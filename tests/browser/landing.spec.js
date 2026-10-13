@@ -37,6 +37,7 @@ test('create account validates confirmation and persists a working login', async
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByLabel('Confirm password').fill('different-password');
+  await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('Passwords must match.');
   await page.getByLabel('Confirm password').fill(password);
@@ -63,6 +64,7 @@ test('signup failure stays on the create-account form', async ({ page }) => {
   await page.getByLabel('Email address').fill('retry@example.com');
   await page.getByLabel('Password', { exact: true }).fill('signup-test-password');
   await page.getByLabel('Confirm password').fill('signup-test-password');
+  await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('Please try again.');
   await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
@@ -86,4 +88,32 @@ test('forgot password opens recovery and explains unavailable delivery', async (
   await page.getByLabel('Confirm password').fill('new-test-password');
   await page.getByRole('button', { name: 'Update password' }).click();
   await expect(page.getByRole('alert')).toContainText('invalid or expired');
+});
+
+test('policies and account data controls work', async ({ page }, testInfo) => {
+  await page.goto('/#privacy');
+  await expect(page.getByRole('heading', { name: 'Privacy Policy', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'mudiyalasanith2006@gmail.com', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('privacy-policy.png'), fullPage: true });
+  await page.getByRole('link', { name: 'Terms', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Terms of Service', exact: true })).toBeVisible();
+  await page.goto('/#signup');
+  await page.getByLabel('Email address').fill(`privacy-${testInfo.project.name}@example.com`);
+  await page.getByLabel('Password', { exact: true }).fill('privacy-test-password');
+  await page.getByLabel('Confirm password').fill('privacy-test-password');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /Understand your codebase/ })).toBeVisible();
+  await page.goto('/#settings');
+  await page.getByLabel('Current password').fill('privacy-test-password');
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export my data' }).click();
+  expect((await downloaded).suggestedFilename()).toBe('codelens-data.json');
+  await expect(page.getByText('Your data export has downloaded.', { exact: false })).toBeVisible();
+  await page.getByLabel('Current password').fill('privacy-test-password');
+  await page.getByRole('button', { name: 'Delete account', exact: true }).click();
+  await page.getByLabel('Confirmation', { exact: true }).fill('DELETE');
+  await page.getByRole('button', { name: 'Permanently delete account' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
 });
