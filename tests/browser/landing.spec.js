@@ -27,3 +27,44 @@ test('public website previews the product and leads into the workspace', async (
   await page.screenshot({ path: testInfo.outputPath('workspace.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
+
+test('create account validates confirmation and persists a working login', async ({ page }, testInfo) => {
+  const email = `signup-${testInfo.project.name}@example.com`;
+  const password = 'signup-test-password';
+  await page.goto('/#signin');
+  await page.getByRole('link', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
+  await page.getByLabel('Email address').fill(email);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByLabel('Confirm password').fill('different-password');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Passwords must match.');
+  await page.getByLabel('Confirm password').fill(password);
+  const created = page.waitForResponse(response => response.url().endsWith('/api/auth/signup'));
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  expect((await created).status()).toBe(201);
+  await expect(page.getByRole('heading', { name: /Understand your codebase/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /Understand your codebase/ })).toBeVisible();
+  await page.context().clearCookies();
+  await page.goto('/#signin');
+  await page.reload();
+  await page.getByLabel('Email address').fill(email);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /Understand your codebase/ })).toBeVisible();
+});
+
+test('signup failure stays on the create-account form', async ({ page }) => {
+  await page.route('**/api/auth/signup', route => route.fulfill({
+    status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Please try again.' }),
+  }));
+  await page.goto('/#signup');
+  await page.getByLabel('Email address').fill('retry@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('signup-test-password');
+  await page.getByLabel('Confirm password').fill('signup-test-password');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Please try again.');
+  await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
+  await expect(page).toHaveURL(/#signup$/);
+});
