@@ -23,7 +23,7 @@
     "test:responsive": "playwright test --config playwright.responsive.config.js"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.0",
     "concurrently": "^9.1.0",
     "cross-env": "^7.0.3"
   },
