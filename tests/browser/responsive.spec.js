@@ -42,10 +42,14 @@ test('pages and analysis views adapt across screen sizes', async ({ page }, test
       await expect(page.locator('.view-loading')).toHaveCount(0);
       await fits(page, `${tab} at ${width}`);
       if (tab === 'Graph') {
+        await expect(page.locator('.architecture-canvas')).toBeVisible();
+        await fits(page, `architecture at ${width}`);
+        await page.getByRole('button', { name: 'File imports', exact: true }).click();
         await expect.poll(() => page.locator('.graph-canvas').evaluate(el => {
           const canvas = el.querySelector('canvas');
           return Boolean(canvas && canvas.getBoundingClientRect().width <= el.clientWidth + 1 && canvas.getBoundingClientRect().height <= el.clientHeight + 1);
         })).toBe(true);
+        await page.getByRole('button', { name: 'Architecture', exact: true }).click();
       }
     }
     await page.getByRole('button', { name: 'Structure', exact: true }).click();

@@ -1,0 +1,44 @@
+.graph-view-switch { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-muted); }
+.graph-view-switch button { border: 0; border-radius: 5px; background: transparent; color: var(--ink-muted); cursor: pointer; padding: 10px 16px; font-size: 12px; min-height: 42px; }
+.graph-view-switch button[aria-pressed="true"] { background: var(--surface); color: var(--brand); box-shadow: 0 1px 4px #24325312; }
+.architecture-view { min-width: 0; }
+.architecture-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.architecture-heading h3 { font-size: 18px; font-weight: 550; letter-spacing: -.4px; }
+.architecture-heading p { color: var(--ink-muted); font-size: 12px; line-height: 1.8; margin-top: 8px; max-width: 610px; }
+.architecture-heading>.btn { flex-shrink: 0; }
+.architecture-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 22px 0 16px; }
+.architecture-toolbar label { font-size: 12px; color: var(--ink-secondary); }
+.architecture-search { flex: 1 1 220px; }
+.architecture-layout { display: flex; align-items: center; gap: 8px; }
+.architecture-layout select { padding: 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink-secondary); max-width: 100%; }
+.architecture-packages { display: flex; align-items: center; gap: 6px; }
+.architecture-workbench { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface-muted); }
+.architecture-workbench.has-selection { grid-template-columns: minmax(0, 1fr) 280px; }
+.architecture-canvas { height: clamp(360px, 65dvh, 760px); min-width: 0; position: relative; }
+.architecture-view .react-flow { --xy-background-color: var(--surface-muted); --xy-controls-button-background-color-default: var(--surface); --xy-controls-button-color-default: var(--ink); --xy-controls-button-border-color-default: var(--line); --xy-minimap-background-color-default: var(--surface); }
+.architecture-node { border: 1px solid var(--line-strong); border-top: 3px solid #7295ce; border-radius: 9px; width: 230px; height: 100px; background: var(--surface); box-shadow: 0 3px 12px #24325308; }
+.architecture-node.kind-concept { border-top-color: #8b7ac6; }.architecture-node.kind-package { border-top-color: #b89a5e; }
+.react-flow__node.selected .architecture-node { outline: 2px solid var(--brand); outline-offset: 3px; }
+.architecture-node-button { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: stretch; text-align: left; padding: 10px 14px; background: none; border: 0; border-radius: inherit; color: var(--ink); cursor: pointer; }
+.architecture-node-kind { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-muted); }
+.architecture-node strong { font-size: 13px; font-weight: 550; line-height: 1.4; margin: 5px 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.architecture-node-button>span:last-child { font-size: 10px; color: var(--ink-muted); margin-top: auto; display: flex; justify-content: space-between; }
+.architecture-view .react-flow__controls-button { width: 36px; height: 36px; }
+.architecture-node .react-flow__handle { background: var(--surface); border-color: var(--line-strong); width: 6px; height: 6px; }
+.architecture-inspector { padding: 20px; background: var(--surface); border-left: 1px solid var(--line); max-height: 760px; overflow-y: auto; overflow-wrap: anywhere; min-width: 0; }
+.architecture-inspector-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.architecture-inspector .eyebrow { font-size: 9px; }.architecture-inspector h4 { font-size: 17px; margin: 15px 0 10px; }
+.architecture-inspector p { color: var(--ink-muted); font-size: 12px; line-height: 1.8; margin-bottom: 16px; }
+.architecture-inspector h5 { font-size: 11px; color: var(--ink-secondary); margin: 24px 0 10px; }
+.architecture-files { display: grid; gap: 7px; max-height: 240px; overflow-y: auto; }
+.architecture-files .file-chip { text-align: left; overflow-wrap: anywhere; white-space: normal; font-size: 11px; }
+.architecture-connections { list-style: none; padding: 0; }.architecture-connections li { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.architecture-connections li>button { border: 0; background: none; color: var(--brand); text-align: left; font-size: 12px; cursor: pointer; overflow-wrap: anywhere; }
+.architecture-connections small { display: block; color: var(--ink-muted); font-size: 10px; margin-top: 6px; }
+.architecture-connections summary { font-size: 11px; cursor: pointer; margin-top: 8px; }.architecture-connections .file-chip { white-space: normal; margin-top: 8px; }
+.architecture-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 14px; font-size: 11px; color: var(--ink-muted); }
+.architecture-legend { display: flex; flex-wrap: wrap; gap: 15px; }.architecture-legend i { width: 17px; display: inline-block; border-top: 2px solid #8a97b4; vertical-align: middle; margin-right: 5px; }.architecture-legend i.inferred { border-top-style: dashed; }
+.architecture-component-list { margin-top: 18px; font-size: 12px; color: var(--ink-secondary); }.architecture-component-list summary { cursor: pointer; margin-bottom: 12px; }
+.architecture-empty { display: grid; place-content: center; text-align: center; height: 100%; padding: 20px; }.architecture-empty p, .architecture-caveat { color: var(--ink-muted); font-size: 12px; margin-top: 10px; }
+@container (max-width: 1000px) { .architecture-workbench.has-selection { grid-template-columns: minmax(0, 1fr); }.architecture-inspector { border-left: 0; border-top: 1px solid var(--line); max-height: 450px; } }
+@media (max-width: 650px) { .architecture-heading { flex-wrap: wrap; gap: 10px; }.architecture-canvas { height: clamp(320px, 60dvh, 550px); }.architecture-view .react-flow__minimap { display: none; }.architecture-toolbar input:not([type="checkbox"]), .architecture-layout select { font-size: 16px; min-height: 44px; }.architecture-toolbar { gap: 10px; }.architecture-heading h3 { font-size: 17px; }.architecture-heading p { font-size: 13px; }.architecture-inspector { padding: 16px; }.architecture-inspector .file-chip { min-height: 44px; }.architecture-layout { flex-wrap: wrap; } }

@@ -35,6 +35,7 @@ test('import, source navigation, graph, persistent chat, and tutorials', async (
   await expect(page.getByRole('status')).toContainText('1 / 1 matching lines');
   await page.getByRole('button', { name: 'Close source viewer' }).click();
   await page.getByRole('button', { name: 'Graph', exact: true }).click();
+  await page.getByRole('button', { name: 'File imports', exact: true }).click();
   await expect(page.getByText('Showing 3 of 3 nodes', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Q&A', exact: true }).click();
   await page.getByLabel('Question about this project').fill('Where is greet implemented?');

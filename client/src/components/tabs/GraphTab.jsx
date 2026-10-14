@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
+import ArchitectureGraph from '../ArchitectureGraph'
 
 export default function GraphTab({ data, onOpenSource }) {
+  const [view, setView] = useState('architecture')
+  if (!data) return <div className="explorer-empty">Analyze a project to explore its architecture.</div>
+  return <div className="tab-page"><div className="graph-view-switch" role="group" aria-label="Graph view">
+    <button type="button" aria-pressed={view === 'architecture'} onClick={() => setView('architecture')}>Architecture</button>
+    <button type="button" aria-pressed={view === 'imports'} onClick={() => setView('imports')}>File imports</button>
+  </div>{view === 'architecture' ? <ArchitectureGraph key={data.jobId} data={data} onOpenSource={onOpenSource} /> : <FileImportGraph data={data} onOpenSource={onOpenSource} />}</div>
+}
+
+function FileImportGraph({ data, onOpenSource }) {
   const [maxNodes, setMaxNodes] = useState(80)
   const [showExternal, setShowExternal] = useState(false)
   const [filter, setFilter] = useState('')
@@ -35,9 +45,9 @@ export default function GraphTab({ data, onOpenSource }) {
     return { nodes: nodes.map(node => ({ ...node })), links: raw.edges.filter(edge => allowed.has(edge.source) && allowed.has(edge.target)).map(edge => ({ ...edge })), total: raw.nodes.length, eligible: eligible.length }
   }, [data, showExternal, focus, filter, maxNodes])
   if (!data) return <div className="explorer-empty">Analyze a project to see its import graph.</div>
-  const fileNodes = data.graph.nodes.filter(node => node.type === 'file')
-  const incoming = focus ? data.graph.edges.filter(edge => edge.target === focus).length : 0
-  const outgoing = focus ? data.graph.edges.filter(edge => edge.source === focus).length : 0
+  const fileNodes = (data.graph?.nodes || []).filter(node => node.type === 'file')
+  const incoming = focus ? (data.graph?.edges || []).filter(edge => edge.target === focus).length : 0
+  const outgoing = focus ? (data.graph?.edges || []).filter(edge => edge.source === focus).length : 0
   return <div className="tab-page"><div className="card">
     <h3>Import graph</h3>
     <p>Click a file node to read its source. Focus on a file to explore its direct dependencies and dependents.</p>

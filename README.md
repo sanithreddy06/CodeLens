@@ -213,3 +213,9 @@ Reset links expire after 15 minutes, are single-use, and are stored as hashes. R
 ### Privacy and security
 
 Public Privacy, Terms, and Security pages use the operator details supplied for CodeLens in India. New public signups must accept policy version `2026-10-14` and confirm they are at least 18. Settings provides password-confirmed data export, account deletion, and sign-out of other sessions. See [SECURITY.md](SECURITY.md) for implementation and operations, and [LAUNCH_REQUIREMENTS.md](LAUNCH_REQUIREMENTS.md) for work needed before public release.
+
+### Interactive architecture diagrams
+
+Open **Graph → Architecture** to explore a diagram inspired by [GitDiagram](https://github.com/ahmedkhaleel2004/gitdiagram). Components link back to included source files. Search names or paths, inspect relationships and import evidence, focus a component's connections, change the flow direction, zoom/pan, or download the current diagram as a standalone SVG. The **File imports** view retains the detailed dependency graph.
+
+The architecture view reuses the saved analysis and makes no additional AI requests. When AI analysis is available it shows source-linked abstractions; otherwise it groups source directories and connects them using detected imports. Dashed connections include AI inference; solid connections are detected imports. Small directory groups beyond the layout limit are combined under **Other folders**, preserving all included files. Diagrams are not runtime traces, and missing or unsupported imports can leave connections incomplete. Source links use the existing authenticated source viewer. No repository data is sent to GitDiagram.

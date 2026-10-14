@@ -62,7 +62,7 @@ export default function ExplorerLayout({ user, aiEnabled, onLogout, error, analy
           {analysisData.aiUnavailable && aiEnabled && <div className="analysis-stale-banner">AI is now available for this project. <button className="btn btn-ghost" disabled={analyzing} onClick={onRetryTutorials}>Generate tutorials</button></div>}
           {analysisData.analysisWarning && <div className="sidebar-error" role="status">Some tutorials could not be completed. Source exploration and completed chapters are available. <button className="btn btn-ghost" disabled={analyzing || !aiEnabled} onClick={onRetryTutorials}>Retry missing tutorials</button></div>}
           <ErrorBoundary key={`${analysisData.jobId}:${activeTab}`}><Suspense fallback={<div className="view-loading" role="status">Loading view…</div>}>
-            {activeTab === 'overview' && <OverviewTab data={analysisData} />}
+            {activeTab === 'overview' && <OverviewTab data={analysisData} onOpenArchitecture={() => setActiveTab('graph')} />}
             {activeTab === 'structure' && <StructureTab data={analysisData} onOpenSource={openSource} />}
             {activeTab === 'graph' && <GraphTab data={analysisData} onOpenSource={openSource} />}
             {activeTab === 'qa' && <QATab key={analysisData.jobId} data={analysisData} aiEnabled={aiEnabled} onOpenSource={openSource} />}

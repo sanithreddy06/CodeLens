@@ -17,6 +17,13 @@ test('source exploration works without any AI configuration', async ({ page }) =
   await page.getByRole('button', { name: 'index.js', exact: true }).click();
   await expect(page.getByRole('dialog')).toContainText('function greet');
   await page.getByRole('button', { name: 'Close source viewer' }).click();
+  await page.getByRole('button', { name: 'Graph', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Inspect Project root', exact: true })).toBeVisible();
+  await expect(page.getByText('Source directories connected by detected imports.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Inspect Project root', exact: true }).click();
+  await page.getByRole('complementary', { name: 'Component details' }).getByRole('button', { name: 'index.js', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('function greet');
+  await page.getByRole('button', { name: 'Close source viewer' }).click();
   await page.getByRole('button', { name: 'Q&A', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Q&A is not enabled yet' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Send question' })).toHaveCount(0);

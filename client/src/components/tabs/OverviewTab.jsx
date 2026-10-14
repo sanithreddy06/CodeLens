@@ -1,7 +1,7 @@
 import MermaidDiagram from '../MermaidDiagram'
 import ReactMarkdown from 'react-markdown'
 
-export default function OverviewTab({ data }) {
+export default function OverviewTab({ data, onOpenArchitecture }) {
   if (!data) {
     return (
       <div className="explorer-empty">
@@ -38,6 +38,7 @@ export default function OverviewTab({ data }) {
         <div className="card diagram-card">
           <h3>Architecture Map</h3>
           <MermaidDiagram chart={data.mermaidDiagram} />
+          <button className="btn btn-ghost" onClick={onOpenArchitecture}>Explore interactive architecture</button>
         </div>
       )}
     </div>
