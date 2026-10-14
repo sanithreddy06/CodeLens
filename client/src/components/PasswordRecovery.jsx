@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Brand } from './LandingPage'
-import { apiRequest, clearSession } from '../config/api'
+import { apiRequest } from '../config/api'
 
-export default function PasswordRecovery({ page }) {
+export default function PasswordRecovery({ page, onReset }) {
   const reset = page.startsWith('#reset-password')
   const token = new URLSearchParams(page.split('?')[1] || '').get('token') || ''
   const [email, setEmail] = useState('')
@@ -21,7 +21,7 @@ export default function PasswordRecovery({ page }) {
       const data = await apiRequest(reset ? '/auth/reset-password' : '/auth/forgot-password', {
         method: 'POST', body: reset ? { token, password } : { email: email.trim() },
       })
-      if (reset) { clearSession(); window.history.replaceState(null, '', '#reset-password'); setPassword(''); setConfirmation('') }
+      if (reset) { onReset(); window.history.replaceState(null, '', '#reset-password'); setPassword(''); setConfirmation('') }
       setMessage(data.message)
     } catch (err) { setError(err.message) }
     finally { setBusy(false) }
@@ -39,7 +39,7 @@ export default function PasswordRecovery({ page }) {
         <button className="login-continue-btn" disabled={busy} type="submit">{busy ? 'Please wait…' : reset ? 'Update password' : 'Send reset link'}</button>
       </form>}
       {error && <p role="alert" className="login-error">{error}</p>}
-      <p className="signin-help"><a href="/#signin" onClick={event => { if (reset && message) { event.preventDefault(); window.location.assign(`${window.location.pathname}${window.location.search}#signin`); window.location.reload() } }}>Back to sign in</a></p>
+      <p className="signin-help"><a href="#signin">Back to sign in</a></p>
     </div></main>
   </div>
 }

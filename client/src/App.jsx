@@ -97,6 +97,12 @@ function App() {
     } catch (err) { setError(err.message) }
     finally { setLoggingIn(false) }
   }
+  const handlePasswordReset = () => {
+    active.current?.abort()
+    clearSession()
+    setUser(null); setAnalysisData(null); setAnalysisJob(null); setHistory([])
+    setNextOffset(null); setAnalyzing(false); setError(null)
+  }
   const handleLogout = async () => {
     active.current?.abort()
     setAnalyzing(false)
@@ -159,7 +165,7 @@ function App() {
   }
   if (checking) return <div className="login-screen" role="status">Loading CodeLens…</div>
   if (['#privacy', '#terms', '#security'].includes(page)) return <LegalPage type={page.slice(1)} />
-  if (page === '#forgot-password' || page.startsWith('#reset-password')) return <PasswordRecovery key={page} page={page} />
+  if (page === '#forgot-password' || page.startsWith('#reset-password')) return <PasswordRecovery key={page} page={page} onReset={handlePasswordReset} />
   if (!user) return ['#signin', '#signup', '#settings'].includes(page) ? <LoginPage key={page} signup={page === '#signup'} onLogin={handleLogin} error={error} loading={loggingIn} /> : <LandingPage />
   return <ExplorerLayout {...preferenceState} showingSettings={page === '#settings'} onSettings={() => { window.location.hash = 'settings'; window.scrollTo(0, 0) }} onWorkspace={() => { window.location.hash = 'workspace'; window.scrollTo(0, 0) }} user={user} aiEnabled={aiEnabled} onLogout={handleLogout} error={error} analysisData={analysisData}
     analysisJob={analysisJob} analysisStartedAt={analysisJob?.createdAt} onAnalyzeGithub={analyzeGithub}

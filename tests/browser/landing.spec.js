@@ -117,3 +117,22 @@ test('policies and account data controls work', async ({ page }, testInfo) => {
   await page.getByRole('button', { name: 'Permanently delete account' }).click();
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
 });
+
+test('password reset clears the signed-in workspace immediately', async ({ page }) => {
+  await page.goto('/#signin');
+  await page.getByLabel('Email address').fill('browser@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('browser-test-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.locator('.project-name')).toHaveText('Your projects');
+  await page.route('**/api/auth/reset-password', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'Your password has been updated.' }) }));
+  await page.goto('/#reset-password?token=test-link');
+  await page.getByLabel('New password', { exact: true }).fill('new-test-password');
+  await page.getByLabel('Confirm password').fill('new-test-password');
+  await page.getByRole('button', { name: 'Update password' }).click();
+  await expect(page.getByRole('status')).toHaveText('Your password has been updated.');
+  await expect(page).toHaveURL(/#reset-password$/);
+  await page.getByRole('link', { name: 'CodeLens home' }).click();
+  await expect(page.getByRole('heading', { name: /Understand the code/ })).toBeVisible();
+  await page.getByRole('link', { name: 'Sign in', exact: true }).last().click();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+});
